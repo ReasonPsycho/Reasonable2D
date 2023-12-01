@@ -8,7 +8,12 @@
 #include "Utilities/Texture.h"
 #include "Cube.h"
 #include "Camera.h"
+#include "Crircle.h"
 #include <stdio.h>
+#include "glm/ext/matrix_float4x4.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtc/random.inl"
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 
@@ -61,6 +66,8 @@ void end_frame();
 
 void cleanup();
 
+
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -99,6 +106,8 @@ float lastY = 0;
 Shader ourShader("res/shaders/basic.vert", "res/shaders/basic.frag");
 Texture ourTexture("res/textures/stone.jpg");
 Cube cube;
+std::vector<Crircle> myCircles;
+Crircle circle(glm::vec2(1.0f,1.0f),glm::vec2(0.0f,0.01f));
 
 // timing
 float deltaTime = 0.0f;
@@ -216,7 +225,13 @@ void init_textures_vertices() {
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
-    cube.init();
+   // cube.init();
+    circle.init();
+    for(int i = 0;i < 10;i++){
+     ;
+        myCircles.push_back(Crircle(glm::gaussRand(glm::vec2(-2.0f),glm::vec2(2.0f)),   glm::gaussRand(glm::vec2(0.01f),glm::vec2(0.05f))));
+        myCircles[i].init(circle.VBO,circle.VAO,circle.EBO);  
+    }
     ourTexture.init();
     ourShader.init();
     ourTexture.use();
@@ -257,7 +272,10 @@ void input() {
 }
 
 void update() {
-
+    for(int i = 0;i < 10;i++){
+        myCircles[i].move();
+        myCircles[i].collide(false,myCircles);
+    }
 }
 
 void render() {
@@ -266,7 +284,12 @@ void render() {
 
     camera.UpdateShader(&ourShader,display_w,display_h);
     
-    cube.render(&ourShader,&ourTexture);
+    //cube.render(&ourShader,&ourTexture);
+    //circle.render(&ourShader,&ourTexture);
+    
+    for(int i = 0;i < 10;i++){
+        myCircles[i].render(&ourShader,&ourTexture);
+   }
 }
 
 void imgui_begin() {
