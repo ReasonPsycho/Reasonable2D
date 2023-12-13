@@ -109,29 +109,29 @@ bool Crircle::checkCollisionCircleRectangle(glm::vec4 reactPoints) {
     bool r = false;
 
     if (position.x - radius < reactPoints.x) {
-        position.x = -position.x + reactPoints.x + radius;
-        velocity.x = -velocity.x;
+        //position.x = -position.x + reactPoints.x + radius;
+        velocity.x = glm::abs(velocity.x);
         r = true;
     }
 
     if (position.x + radius > reactPoints.y) {
-        position.x = -position.x + reactPoints.y - radius;
-        velocity.x = -velocity.x;
+        //position.x = -position.x + reactPoints.y - radius;
+        velocity.x = glm::abs(velocity.x);
         r = true;
 
     }
 
     if (position.y - radius < reactPoints.z) {
 
-        position.y = -position.y + reactPoints.z - radius;
-        velocity.y = -velocity.y;
+        //position.y = -position.y + reactPoints.z - radius;
+        velocity.y = glm::abs(velocity.y);
         r = true;
 
     }
 
     if (position.y + radius > reactPoints.w) {
-        position.y = -position.y + reactPoints.w + radius;
-        velocity.y = -velocity.y;
+        //position.y = -position.y + reactPoints.w + radius;
+        velocity.y = glm::abs(velocity.y);
         r = true;
     }
 
@@ -168,7 +168,7 @@ void Crircle::changeMovment(bool doesSeperate, bool doesBounce) {
             this->position += meanSeparationVector * glm::vec2(0.5);
         }
         if (doesBounce) {
-            this->velocity = glm::normalize(meanSeparationVector);
+            this->velocity = glm::normalize(meanSeparationVector) / glm::vec2(glm::pow(radius,2));
         }
     }
     checkCollisionCircleRectangle(glm::vec4(-10, 10, -10, 10));
