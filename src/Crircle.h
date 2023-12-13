@@ -12,24 +12,34 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+
 class Crircle {
 public:
-    Crircle(glm::vec2 pos,glm::vec2 vel);
+    Crircle(glm::vec2 pos,glm::vec2 vec,float radius,float speed);
     ~Crircle();
 
     void init();
     void init(GLuint newVBO,GLuint newVAO,GLuint newEBO);
     void render(Shader* shaderProgram, Texture* texture);
-    void move();
-    void detectCollisions(const std::vector<Crircle>& circles);
+    void move(float deltaTime);
+    int detectCollisions(std::vector<Crircle> &circles, int thisCricleIndex, bool doesSeperate, bool doesBounce);
+    void changeMovment(bool doesSeperate, bool doesBounce);
     bool checkCollisionCircleRectangle(glm::vec4 reactPoints);
-    void collide(bool doesBallsCollideWithEachOther,const std::vector<Crircle> &circles);
-
+    bool collide(std::vector<Crircle> &circles, int thisCricleIndex, bool doesBallsCollideWithBalls,
+                 bool doesSeperateFromBalls, bool doesBallsBounceWithWalls);
+    bool operator==(const Crircle& c) const;
+    
     glm::vec2 position;
     glm::vec2 velocity;
+    float radius;
+    float speed;
     GLuint VBO, VAO, EBO;
-private:
     std::vector<Crircle> collided;
+private:
+    static int nextID; // Static variable to keep track of the next available ID
+
+    glm::vec2  meanSeparationVector;
+    int uniqueID;      // Instance variable to store the unique ID for each object
 };
 
 

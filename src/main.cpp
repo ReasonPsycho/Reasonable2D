@@ -103,11 +103,16 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = 0;
 float lastY = 0;
 
+bool ballsBounce = true;
+bool ballsSeperate = true;
+bool wallsCollide = true;
+int amountOfCircles = 60;
+
 Shader ourShader("res/shaders/basic.vert", "res/shaders/basic.frag");
 Texture ourTexture("res/textures/stone.jpg");
 Cube cube;
 std::vector<Crircle> myCircles;
-Crircle circle(glm::vec2(1.0f,1.0f),glm::vec2(0.0f,0.01f));
+Crircle circle(glm::vec2(1.0f,1.0f),glm::vec2(0.0f,0.01f),.5f,1.5f);
 
 // timing
 float deltaTime = 0.0f;
@@ -227,9 +232,12 @@ void init_textures_vertices() {
 
    // cube.init();
     circle.init();
-    for(int i = 0;i < 10;i++){
-     ;
-        myCircles.push_back(Crircle(glm::gaussRand(glm::vec2(-2.0f),glm::vec2(2.0f)),   glm::gaussRand(glm::vec2(0.01f),glm::vec2(0.05f))));
+    for(int i = 0;i < amountOfCircles;i++){
+        Crircle newCircle(glm::linearRand(glm::vec2(-5.0f),glm::vec2(5.0f)),   glm::linearRand(glm::vec2(0.5f),glm::vec2(1.0f)), glm::linearRand(0.5f,1.0f),1.5f);
+      //  while (newCircle.collide(myCircles, -1, true, true, true)){
+      //      newCircle = Crircle(glm::linearRand(glm::vec2(-5.0f),glm::vec2(5.0f)),   glm::linearRand(glm::vec2(0.5f),glm::vec2(1.0f)), glm::linearRand(0.4f,0.6f),1.5f);
+      //  }
+        myCircles.push_back(newCircle);
         myCircles[i].init(circle.VBO,circle.VAO,circle.EBO);  
     }
     ourTexture.init();
@@ -267,14 +275,17 @@ void before_frame()
 void input() {
     processInput(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
+    //glfwSetCursorPosCallback(window, mouse_callback);
+    //glfwSetScrollCallback(window, scroll_callback);
 }
 
 void update() {
-    for(int i = 0;i < 10;i++){
-        myCircles[i].move();
-        myCircles[i].collide(false,myCircles);
+    for(int i = 0;i < amountOfCircles;i++){
+        myCircles[i].collide(myCircles, i, ballsBounce ,  ballsSeperate, wallsCollide);
+    }
+    for(int i = 0;i < amountOfCircles;i++){
+        myCircles[i].changeMovment(ballsSeperate, ballsBounce);
+        myCircles[i].move(deltaTime);
     }
 }
 
@@ -287,7 +298,7 @@ void render() {
     //cube.render(&ourShader,&ourTexture);
     //circle.render(&ourShader,&ourTexture);
     
-    for(int i = 0;i < 10;i++){
+    for(int i = 0;i < amountOfCircles;i++){
         myCircles[i].render(&ourShader,&ourTexture);
    }
 }
@@ -302,8 +313,12 @@ void imgui_begin() {
 void imgui_render() {
     /// Add new ImGui controls here
     // Show the big demo window
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
+    ImGui::Begin("Switch:");
+    ImGui::Checkbox("Does balls separate?", &ballsSeperate);
+    ImGui::Checkbox("Does balls collide?", &ballsBounce);
+  //  ImGui::Checkbox("Does balls and walls collide?", &wallsCollide);
+    ImGui::End();
+    
 }
 
 void imgui_end() {
@@ -357,14 +372,14 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset, true,deltaTime);
+   // camera.ProcessMouseMovement(xoffset, yoffset, true,deltaTime);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera.ProcessMouseScroll(static_cast<float>(yoffset),deltaTime);
+   // camera.ProcessMouseScroll(static_cast<float>(yoffset),deltaTime);
 }
 
 void end_frame() {
@@ -384,7 +399,7 @@ void init_camera() {
     lastY = display_h / 2.0f;
     
     // Capture and lock the mouse to the window
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 #pragma endregion Functions
