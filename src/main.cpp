@@ -105,8 +105,9 @@ float lastY = 0;
 
 bool ballsBounce = true;
 bool ballsSeperate = true;
-bool wallsCollide = true;
-int amountOfCircles = 60;
+bool wallsBounce = true;
+bool wallsSeperate = true;
+int amountOfCircles = 200;
 
 Shader ourShader("res/shaders/basic.vert", "res/shaders/basic.frag");
 Texture ourTexture("res/textures/stone.jpg");
@@ -233,7 +234,7 @@ void init_textures_vertices() {
    // cube.init();
     circle.init();
     for(int i = 0;i < amountOfCircles;i++){
-        Crircle newCircle(glm::linearRand(glm::vec2(-5.0f),glm::vec2(5.0f)),   glm::linearRand(glm::vec2(0.5f),glm::vec2(1.0f)), glm::linearRand(0.5f,1.0f),1.5f);
+        Crircle newCircle(glm::linearRand(glm::vec2(-2.5f),glm::vec2(2.5f)),   glm::linearRand(glm::vec2(0.5f),glm::vec2(1.0f)), glm::linearRand(0.5f,1.0f),1.5f);
       //  while (newCircle.collide(myCircles, -1, true, true, true)){
       //      newCircle = Crircle(glm::linearRand(glm::vec2(-5.0f),glm::vec2(5.0f)),   glm::linearRand(glm::vec2(0.5f),glm::vec2(1.0f)), glm::linearRand(0.4f,0.6f),1.5f);
       //  }
@@ -280,11 +281,17 @@ void input() {
 }
 
 void update() {
+
+
     for(int i = 0;i < amountOfCircles;i++){
-        myCircles[i].collide(myCircles, i, ballsBounce ,  ballsSeperate, wallsCollide);
+        myCircles[i].checkCollisionCircleRectangle(glm::vec4(-10, 10, -10, 10), wallsSeperate, wallsBounce);
+    }
+    
+    for(int i = 0;i < amountOfCircles;i++){
+        myCircles[i].collide(myCircles, i, ballsBounce, ballsSeperate);
     }
     for(int i = 0;i < amountOfCircles;i++){
-        myCircles[i].changeMovment(ballsSeperate, ballsBounce);
+        myCircles[i].changeMovment(ballsSeperate, ballsBounce, wallsSeperate, wallsBounce);
         myCircles[i].move(deltaTime);
     }
 }
@@ -316,6 +323,8 @@ void imgui_render() {
     ImGui::Begin("Switch:");
     ImGui::Checkbox("Does balls separate?", &ballsSeperate);
     ImGui::Checkbox("Does balls collide?", &ballsBounce);
+    ImGui::Checkbox("Does balls seperate with walls?", &wallsSeperate);
+    ImGui::Checkbox("Does balls collide with walls?", &wallsBounce);
   //  ImGui::Checkbox("Does balls and walls collide?", &wallsCollide);
     ImGui::End();
     

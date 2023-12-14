@@ -67,7 +67,7 @@ int Crircle::detectCollisions(std::vector<Crircle> &circles, int thisCricleIndex
                               bool doesBounce) {
 
     int colisionSize = 0;
-    if (doesSeperate && doesBounce) {
+    if (doesSeperate || doesBounce) {
 
         for (int i = 0; i < circles.size(); ++i) {
             if (i != thisCricleIndex) {
@@ -81,7 +81,6 @@ int Crircle::detectCollisions(std::vector<Crircle> &circles, int thisCricleIndex
             }
         }
         if (!collided.empty()) {
-            meanSeparationVector = glm::vec2(0);
             for (int i = 0; i < collided.size(); ++i) {
                 glm::vec2 separationVector =
                         ((position - collided[i].position) / glm::length(position - collided[i].position)) *
@@ -105,37 +104,29 @@ int Crircle::detectCollisions(std::vector<Crircle> &circles, int thisCricleIndex
     return colisionSize;
 }
 
-bool Crircle::checkCollisionCircleRectangle(glm::vec4 reactPoints) {
+bool Crircle::checkCollisionCircleRectangle(glm::vec4 reactPoints, bool doesSeperate, bool doesBounce) {
     bool r = false;
+    if (doesSeperate || doesBounce) {
 
-    if (position.x - radius < reactPoints.x) {
-        //position.x = -position.x + reactPoints.x + radius;
-        velocity.x = glm::abs(velocity.x);
-        r = true;
+        glm::vec2 f = glm::vec2(glm::clamp(position.x, reactPoints.x, reactPoints.y),
+                                glm::clamp(position.y, reactPoints.z, reactPoints.w));
+        if (glm::length(position - f) >= radius) {
+            glm::vec2 separationVector = glm::vec2(0);
+            if (position != f) {
+                separationVector = ((position - f) / glm::length(position - f)) * (radius - glm::length(position - f));
+            } else {
+                float left = position.x - reactPoints.x + radius;
+                float top = position.y - reactPoints.z + radius;
+                float right = reactPoints.y - position.x + radius;
+                float bottom = reactPoints.w - position.y + radius;
+                separationVector = glm::vec2(glm::min(left,right),glm::min(top,bottom));
+            }
+            this->wallsSeparationVector = separationVector;
+
+            return true;
+        }
+
     }
-
-    if (position.x + radius > reactPoints.y) {
-        //position.x = -position.x + reactPoints.y - radius;
-        velocity.x = glm::abs(velocity.x);
-        r = true;
-
-    }
-
-    if (position.y - radius < reactPoints.z) {
-
-        //position.y = -position.y + reactPoints.z - radius;
-        velocity.y = glm::abs(velocity.y);
-        r = true;
-
-    }
-
-    if (position.y + radius > reactPoints.w) {
-        //position.y = -position.y + reactPoints.w + radius;
-        velocity.y = glm::abs(velocity.y);
-        r = true;
-    }
-
-    // If the distance is less than the circle's radius, an intersection occurs
     return r;
 }
 
@@ -144,9 +135,9 @@ void Crircle::move(float deltaTime) {
 }
 
 bool Crircle::collide(std::vector<Crircle> &circles, int thisCricleIndex, bool doesBallsCollideWithBalls,
-                      bool doesSeperateFromBalls, bool doesBallsBounceWithWalls) {
+                      bool doesSeperateFromBalls) {
     if (!circles.empty()) {
-        return detectCollisions(circles, thisCricleIndex, doesSeperateFromBalls, doesBallsBounceWithWalls);
+        return detectCollisions(circles, thisCricleIndex, doesSeperateFromBalls, doesBallsCollideWithBalls);
     }
     return false;
 }
@@ -161,16 +152,45 @@ bool Crircle::operator==(const Crircle &c) const {
 
 int Crircle::nextID = 0;
 
-void Crircle::changeMovment(bool doesSeperate, bool doesBounce) {
+void Crircle::changeMovment(bool doesSeperate, bool doesBounce, bool doesWallsSeperate, bool doesWallsBounce) {
 
-    if (meanSeparationVector != glm::vec2(0)) {
+    glm::vec2 newSepration;
+    glm::vec2 newVelocity;
+
+    if (doesWallsSeperate) {
+        newSepration = wallsSeparationVector;
         if (doesSeperate) {
-            this->position += meanSeparationVector * glm::vec2(0.5);
+            newSepration += meanSeparationVector;
+            newSepration /= 2;
         }
+    }else if (doesSeperate){
+        newSepration = meanSeparationVector;
+    }
+
+
+    if (doesWallsBounce) {
+        newVelocity = wallsSeparationVector;
         if (doesBounce) {
-            this->velocity = glm::normalize(meanSeparationVector) / glm::vec2(glm::pow(radius,2));
+            newVelocity += meanSeparationVector;
+            newVelocity /= 2;
+        }
+    }else if (doesBounce){
+        newVelocity = meanSeparationVector;
+    }
+
+    if (newSepration != glm::vec2(0)) {
+        if (doesSeperate || doesWallsSeperate) {
+            this->position += newSepration * glm::vec2(0.5);
         }
     }
-    checkCollisionCircleRectangle(glm::vec4(-10, 10, -10, 10));
+    
+    if (newVelocity != glm::vec2(0)) {
+        if (doesBounce || doesWallsBounce) {
+            this->velocity = glm::normalize(newVelocity) / glm::vec2(glm::pow(radius, 2));
+        }
+    }
+
+    wallsSeparationVector = glm::vec2(0);
+    meanSeparationVector = glm::vec2(0);
 }
 // Initializing the static variable outside the class definition

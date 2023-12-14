@@ -23,10 +23,10 @@ public:
     void render(Shader* shaderProgram, Texture* texture);
     void move(float deltaTime);
     int detectCollisions(std::vector<Crircle> &circles, int thisCricleIndex, bool doesSeperate, bool doesBounce);
-    void changeMovment(bool doesSeperate, bool doesBounce);
-    bool checkCollisionCircleRectangle(glm::vec4 reactPoints);
+    void changeMovment(bool doesSeperate, bool doesBounce, bool doesWallsSeperate, bool doesWallsBounce);
+    bool checkCollisionCircleRectangle(glm::vec4 reactPoints, bool doesSeperate, bool doesBounce);
     bool collide(std::vector<Crircle> &circles, int thisCricleIndex, bool doesBallsCollideWithBalls,
-                 bool doesSeperateFromBalls, bool doesBallsBounceWithWalls);
+                 bool doesSeperateFromBalls);
     bool operator==(const Crircle& c) const;
     
     glm::vec2 position;
@@ -39,6 +39,7 @@ private:
     static int nextID; // Static variable to keep track of the next available ID
 
     glm::vec2  meanSeparationVector;
+    glm::vec2  wallsSeparationVector;
     int uniqueID;      // Instance variable to store the unique ID for each object
 };
 
