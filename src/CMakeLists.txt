@@ -30,7 +30,17 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} ${ASSETS_FILES}
         Camera.cpp
         Camera.h
         Crircle.cpp
-        Crircle.h)
+        Crircle.h
+        ICollision.cpp
+        ICollision.h
+        ITransform.cpp
+        ITransform.h
+        IRenderable.cpp
+        IRenderable.h
+        MapSystem.cpp
+        MapSystem.h
+        Tile.cpp
+        Tile.h)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 target_compile_definitions(${PROJECT_NAME} PRIVATE LIBRARY_SUFFIX="")

@@ -4,6 +4,8 @@
 
 #include "Crircle.h"
 
+int Crircle::nextID = 0;
+
 Crircle::Crircle(glm::vec2 pos, glm::vec2 vel, float rad, float speed) : position(pos), velocity(vel), radius(rad),
                                                                          speed(speed) {
     uniqueID = nextID++; // Assign the current value of nextID and then increment it for the next instance
@@ -150,7 +152,6 @@ bool Crircle::operator==(const Crircle &c) const {
     return this->uniqueID == c.uniqueID;
 }
 
-int Crircle::nextID = 0;
 
 void Crircle::changeMovment(bool doesSeperate, bool doesBounce, bool doesWallsSeperate, bool doesWallsBounce) {
 
