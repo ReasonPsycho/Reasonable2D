@@ -9,9 +9,9 @@
 #include "ICollision.h"
 #include "IRenderable.h"
 
-class Tile : public ICollision, IRenderable{
+class Tile : public ICollision, public IRenderable, public virtual ITransform{
 public:
-    Tile(Shader *shader, Texture *texture, GLuint vao, CollsionTypeEnum collsionType, bool isKinematic);
+    Tile(Shader *shader, Texture *texture, GLuint vao, CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 position, float rotation, glm::vec2 vel, glm::vec2 scale);
 };
 
 

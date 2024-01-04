@@ -14,7 +14,7 @@
 using namespace gl;
 
 
-class IRenderable : public ITransform{
+class IRenderable : virtual public ITransform{
 public:
     IRenderable(Shader* shader, Texture* texture,GLuint VAO) ;
     ~IRenderable();
@@ -24,7 +24,7 @@ public:
     GLuint FBO;
     GLuint EBO;
     float opacity;
-    
+
     void render();
 };
 

@@ -24,3 +24,14 @@ void ITransform::moveByInputVector(glm::vec2 inputVector) {
     translate();
 
 }
+
+ITransform::ITransform(glm::vec2 position, float rotation, glm::vec2 vel, glm::vec2 scale) : transform(position,rotation,vel,scale){
+
+}
+
+Transform::Transform(glm::vec2 vec1, float d, glm::vec2 vec2, glm::vec2 vec3) {
+position = vec1;
+rotation = d;
+velocity = vec2;
+scale = vec3;
+}

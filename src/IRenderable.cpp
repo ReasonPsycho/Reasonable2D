@@ -18,13 +18,8 @@ void IRenderable::render() {
     shader->setMatrix4("transform", false, glm::value_ptr(model));
     shader->setVec3("lightColor", 1.0f, 0.0f, 1.0f);
 
-    glEnable(GL_BLEND); //CHECK make sure that this is right XD 
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 100);
-    
-    glDisable(GL_BLEND);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
 }
 
 IRenderable::IRenderable(Shader* shader, Texture* texture,GLuint VAO): shader(shader),texture(texture),VAO(VAO) {

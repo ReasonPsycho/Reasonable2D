@@ -16,7 +16,7 @@ enum CollsionTypeEnum{
     Circle
 };
 
-class ICollision : public ITransform {
+class ICollision : virtual public ITransform {
 public:
     ICollision(CollsionTypeEnum collsionType, bool isKinematic);
     void detectCollisions(const std::vector<ICollision> otherObjects);

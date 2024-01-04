@@ -14,6 +14,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/random.inl"
+#include "MapSystem.h"
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 
@@ -114,6 +115,7 @@ Texture ourTexture("res/textures/stone.jpg");
 Cube cube;
 std::vector<Crircle> myCircles;
 Crircle circle(glm::vec2(1.0f,1.0f),glm::vec2(0.0f,0.01f),.5f,1.5f);
+MapSystem map(&ourShader);
 
 // timing
 float deltaTime = 0.0f;
@@ -246,6 +248,7 @@ void init_textures_vertices() {
     ourTexture.use();
     ourShader.use();
     ourShader.setInt("ourTexture", 0);
+    map.init();
 }
 
 void init_imgui() {
@@ -304,7 +307,7 @@ void render() {
     
     //cube.render(&ourShader,&ourTexture);
     //circle.render(&ourShader,&ourTexture);
-    
+    map.render();
     for(int i = 0;i < amountOfCircles;i++){
         myCircles[i].render(&ourShader,&ourTexture);
    }
