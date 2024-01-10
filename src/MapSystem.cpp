@@ -77,7 +77,7 @@ void MapSystem::init() {
                 if (texture.HasMember("path") && texture.HasMember("name")) {
                     std::string path = texture["path"].GetString();
                     std::string name = texture["name"].GetString();
-                    std::shared_ptr<Texture> tmpTexture = std::make_shared<Texture>(Texture((path + name).c_str()));
+                    std::shared_ptr<Texture> tmpTexture = std::make_shared<Texture>((path + name).c_str());
                     tmpTexture->init();
                     textureMap[name] = tmpTexture;
                 }
