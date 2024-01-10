@@ -18,7 +18,7 @@ enum CollsionTypeEnum{
 
 class ICollision : virtual public ITransform {
 public:
-    ICollision(CollsionTypeEnum collsionType, bool isKinematic);
+    ICollision(CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 scale = glm::vec2(1));
     void detectCollisions(const std::vector<ICollision> otherObjects);
     void seperateObject();
     void bounceObject();
@@ -34,7 +34,7 @@ public:
     bool isKinematic; //Not affected by stuff
 private:
     glm::vec4 reactPoints;
-    glm::vec2  meanSeparationVector;
+    glm::vec2  meanSeparationVector = glm::vec2(0);
     static int nextID; // Static variable to keep track of the next available ID
     int uniqueID;      // Instance variable to store the unique ID for each object
     glm::vec2 SquareSeparationVector(ICollision object);

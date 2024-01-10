@@ -77,8 +77,7 @@ void MapSystem::init() {
                 if (texture.HasMember("path") && texture.HasMember("name")) {
                     std::string path = texture["path"].GetString();
                     std::string name = texture["name"].GetString();
-                    std::shared_ptr<Texture> tmpTexture = std::make_shared<Texture>((path + name).c_str());
-                    tmpTexture->init();
+                    std::shared_ptr<Texture> tmpTexture = std::make_shared<Texture>(name,path, "IDK");
                     textureMap[name] = tmpTexture;
                 }
             }
@@ -100,6 +99,9 @@ void MapSystem::init() {
 
                     spdlog::info(std::to_string(x) + " " + std::to_string(y));
                     tiles.push_back(*new Tile(shader, textureMap[texture].get(), VAO, Square, true,glm::vec2(x,y),0,glm::vec2(0),glm::vec2(1)));
+                    if (texture == "black.jpg"){
+                        collisions.push_back(tiles[i]);
+                    }
                 }
             }
         }

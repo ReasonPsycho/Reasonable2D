@@ -22,7 +22,6 @@ void ITransform::moveByInputVector(glm::vec2 inputVector) {
     transform.velocity.x = (inputVector.x * (1.0f - smooth) + transform.velocity.x * smooth) * speed;
     transform.velocity.y = (inputVector.y * (1.0f - smooth) + transform.velocity.y * smooth) * speed;
     translate();
-
 }
 
 ITransform::ITransform(glm::vec2 position, float rotation, glm::vec2 vel, glm::vec2 scale) : transform(position,rotation,vel,scale){

@@ -6,7 +6,7 @@
 #include "imgui_impl/imgui_impl_opengl3.h"
 #include "Utilities/Shader.h"
 #include "Utilities/Texture.h"
-#include "Cube.h"
+#include "Squere.h"
 #include "Camera.h"
 #include "Crircle.h"
 #include <stdio.h>
@@ -68,10 +68,12 @@ void end_frame();
 void cleanup();
 
 
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+
 void processInput(GLFWwindow *window);
 
 #pragma endregion Function definitions
@@ -111,11 +113,10 @@ bool wallsSeperate = true;
 int amountOfCircles = 200;
 
 Shader ourShader("res/shaders/basic.vert", "res/shaders/basic.frag");
-Texture ourTexture("res/textures/stone.jpg");
-Cube cube;
-std::vector<Crircle> myCircles;
-Crircle circle(glm::vec2(1.0f,1.0f),glm::vec2(0.0f,0.01f),.5f,1.5f);
-MapSystem map(&ourShader);
+Crircle circle(glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 0.01f), .5f, 1.5f);
+MapSystem mapSystem(&ourShader);
+
+Squere *squere;
 
 // timing
 float deltaTime = 0.0f;
@@ -126,7 +127,7 @@ float lastFrame = 0.0f;
 
 int main(int, char **) {
 
-    #pragma region Init
+#pragma region Init
 
     if (!init()) {
         spdlog::error("Failed to initialize project!");
@@ -142,21 +143,18 @@ int main(int, char **) {
 
     init_camera();
     spdlog::info("Initialized camera and viewport.");
-    
+
     // configure global opengl state
     glEnable(static_cast<gl::GLenum>(GL_DEPTH_TEST));
-   glDepthFunc(static_cast<gl::GLenum>(GL_LESS));
+    glDepthFunc(static_cast<gl::GLenum>(GL_LESS));
 
-    #pragma endregion Init
-
-    auto shader = glCreateShader(static_cast<gl::GLenum>(GL_COMPUTE_SHADER));
-
+#pragma endregion Init
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         //Setting up things for the rest of functionalities (ex. delta time)
         before_frame();
-        
+
         // Process I/O operations here
         input();
 
@@ -232,23 +230,13 @@ bool init() {
 void init_textures_vertices() {
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-
-   // cube.init();
-    circle.init();
-    for(int i = 0;i < amountOfCircles;i++){
-        Crircle newCircle(glm::linearRand(glm::vec2(-2.5f),glm::vec2(2.5f)),   glm::linearRand(glm::vec2(0.5f),glm::vec2(1.0f)), glm::linearRand(0.5f,1.0f),1.5f);
-      //  while (newCircle.collide(myCircles, -1, true, true, true)){
-      //      newCircle = Crircle(glm::linearRand(glm::vec2(-5.0f),glm::vec2(5.0f)),   glm::linearRand(glm::vec2(0.5f),glm::vec2(1.0f)), glm::linearRand(0.4f,0.6f),1.5f);
-      //  }
-        myCircles.push_back(newCircle);
-        myCircles[i].init(circle.VBO,circle.VAO,circle.EBO);  
-    }
-    ourTexture.init();
     ourShader.init();
-    ourTexture.use();
     ourShader.use();
     ourShader.setInt("ourTexture", 0);
-    map.init();
+    mapSystem.init();
+
+    squere = new Squere(&ourShader, mapSystem.textureMap["black.jpg"].get(), mapSystem.VAO, Square, false,
+                        glm::vec2(-5, 0), 0, glm::vec2(0), glm::vec2(0.6));
 }
 
 void init_imgui() {
@@ -268,8 +256,7 @@ void init_imgui() {
     //ImGui::StyleColorsClassic();
 }
 
-void before_frame()
-{
+void before_frame() {
     // Setting up delta time
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
@@ -285,32 +272,23 @@ void input() {
 
 void update() {
 
-
-    for(int i = 0;i < amountOfCircles;i++){
-        myCircles[i].checkCollisionCircleRectangle(glm::vec4(-10, 10, -10, 10), wallsSeperate, wallsBounce);
-    }
-    
-    for(int i = 0;i < amountOfCircles;i++){
-        myCircles[i].collide(myCircles, i, ballsBounce, ballsSeperate);
-    }
-    for(int i = 0;i < amountOfCircles;i++){
-        myCircles[i].changeMovment(ballsSeperate, ballsBounce, wallsSeperate, wallsBounce);
-        myCircles[i].move(deltaTime);
-    }
 }
 
 void render() {
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(static_cast<ClearBufferMask>(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    camera.UpdateShader(&ourShader,display_w,display_h);
-    
+    camera.Position = glm::vec3 (squere->transform.position,0);
+    camera.UpdateShader(&ourShader, display_w, display_h);
+
     //cube.render(&ourShader,&ourTexture);
     //circle.render(&ourShader,&ourTexture);
-    map.render();
-    for(int i = 0;i < amountOfCircles;i++){
-        myCircles[i].render(&ourShader,&ourTexture);
-   }
+
+    squere->render();
+    mapSystem.render();
+    
+    squere->detectCollisions(mapSystem.collisions);
+    squere->seperateObject();
 }
 
 void imgui_begin() {
@@ -328,9 +306,9 @@ void imgui_render() {
     ImGui::Checkbox("Does balls collide?", &ballsBounce);
     ImGui::Checkbox("Does balls seperate with walls?", &wallsSeperate);
     ImGui::Checkbox("Does balls collide with walls?", &wallsBounce);
-  //  ImGui::Checkbox("Does balls and walls collide?", &wallsCollide);
+    //  ImGui::Checkbox("Does balls and walls collide?", &wallsCollide);
     ImGui::End();
-    
+
 }
 
 void imgui_end() {
@@ -340,11 +318,12 @@ void imgui_end() {
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
-{
+void processInput(GLFWwindow *window) {
+    glm::vec2 keyMove = glm::vec2(0);
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
+    /*
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -357,12 +336,25 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(UPWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
         camera.ProcessKeyboard(DOWNWARD, deltaTime);
+*/
+    
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        keyMove.y += 1;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        keyMove.y -= 1;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        keyMove.x -= 1;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        keyMove.x += 1;
+
+    if(keyMove != glm::vec2(0)){
+        squere->moveByInputVector(keyMove);
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
@@ -373,25 +365,23 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
-{
+void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
-    
+
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
 
     lastX = xpos;
     lastY = ypos;
 
-   // camera.ProcessMouseMovement(xoffset, yoffset, true,deltaTime);
+    // camera.ProcessMouseMovement(xoffset, yoffset, true,deltaTime);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-   // camera.ProcessMouseScroll(static_cast<float>(yoffset),deltaTime);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+    // camera.ProcessMouseScroll(static_cast<float>(yoffset),deltaTime);
 }
 
 void end_frame() {
@@ -409,7 +399,7 @@ void init_camera() {
     glViewport(0, 0, display_w, display_h);
     lastX = display_w / 2.0f;
     lastY = display_h / 2.0f;
-    
+
     // Capture and lock the mouse to the window
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }

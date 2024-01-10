@@ -24,8 +24,8 @@ public:
     glm::vec2 vel = glm::vec2(0),
     glm::vec2 scale= glm::vec2(0));
     Transform transform;
-    float smooth;//Q: WIll this slow down this A: Yes and what
-    float speed;
+    float smooth = 0.1f;//Q: WIll this slow down this A: Yes and what
+    float speed = 2.5f;
     
     void moveByMousePos(glm::vec2 mousePosition);
     void moveByInputVector(glm::vec2 mousePosition);

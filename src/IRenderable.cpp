@@ -9,7 +9,7 @@
 
 
 void IRenderable::render() {
-    texture->use();
+    texture->use(GL_TEXTURE0);
     shader->use();
 
     glm::mat4 model(1.0f);

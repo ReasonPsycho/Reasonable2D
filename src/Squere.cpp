@@ -2,17 +2,12 @@
 // Created by redkc on 20/11/2023.
 //
 
-#include "Cube.h"
+#include "Squere.h"
 #include "Utilities/Shader.h"
 #include "Utilities/Texture.h"
 using namespace gl;
 
-
-Cube::Cube()  {
-    model = glm::mat4(1.0f);
-}
-
-void Cube::init() {
+/*
     const int numSegments = 100; // Number of segments in the circle
     float radius = 0.5f; // Radius of the circle
     float circleVertices[(numSegments + 1) * 5]; // 5 values per vertex (x, y, z, s, t)
@@ -41,20 +36,11 @@ void Cube::init() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-}
+     */
 
-Cube::~Cube() {
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-}
 
-void Cube::render(Shader* shader,Texture* texture) {
-    texture->use();
-    shader->use(); //Don't need this yet tbh
-    model = glm::rotate(model,0.001f, glm::vec3(1, 1, 1)) ;
-    shader->setMatrix4("transform",false, glm::value_ptr(model));
-    shader->setVec3("lightColor",  1.0f, 0.0f, 1.0f);
 
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6 * 6, GL_UNSIGNED_INT, 0);
+Squere::Squere(Shader *shader, Texture *texture, GLuint vao, CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 position, float rotation, glm::vec2 vel, glm::vec2 scale) : IRenderable(
+        shader, texture, vao), ICollision(collsionType, isKinematic,scale), ITransform(position,rotation,vel,scale) {
+
 }

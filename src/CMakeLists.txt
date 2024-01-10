@@ -25,8 +25,8 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} ${ASSETS_FILES}
         Utilities/Shader.h
         Utilities/Texture.cpp
         Utilities/Texture.h
-        Cube.cpp
-        Cube.h
+        Squere.cpp
+        Squere.h
         Camera.cpp
         Camera.h
         Crircle.cpp

@@ -52,14 +52,13 @@ void Crircle::init(GLuint newVBO, GLuint newVAO, GLuint newEBO) {
 
 
 void Crircle::render(Shader *shader, Texture *texture) {
-    texture->use();
     shader->use(); //Don't need this yet tbh
     // creates a 4x4 matrix and makes all elements 0.0f
     glm::mat4 model(1.0f);
     model = glm::translate(model, glm::vec3(position, -30.0f));
     model = glm::scale(model, glm::vec3(radius * 2));
     shader->setMatrix4("transform", false, glm::value_ptr(model));
-    shader->setVec3("lightColor", 1.0f, 0.0f, 1.0f);
+    shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 100);

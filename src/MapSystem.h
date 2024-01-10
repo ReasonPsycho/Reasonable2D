@@ -19,9 +19,9 @@ public:
     Shader *shader;
     std::map<std::string, std::shared_ptr<Texture>> textureMap;
     std::vector<Tile> tiles;
+    std::vector<ICollision> collisions;
     rapidjson::Document document;
     void render();
-private:
     GLuint VAO{}, EBO{}, VBO{};
 };
 

@@ -1,13 +1,22 @@
-#include <string>
 #include "Texture.h"
 
 using namespace gl;
 
-void Texture::init() {  //TODO Expand size of this dude
+
+void Texture::use(GLenum GL_TEXTUREX) {
+    glActiveTexture(GL_TEXTUREX);
+    glBindTexture(GL_TEXTURE_2D, ID);
+}
+
+Texture::~Texture() {
+    glDeleteTextures(1,&ID);
+}
+
+Texture::Texture(string name , string directory,string type) :name(name),directory(directory), type(type){
     glGenTextures(1, &ID);
     // set the texture wrapping/filtering options (on the currently bound texture object) //TODO this prob should be in class inputs
     // load and generate the texture
-    std::string path =  texturePath;
+    string path =  directory + "/" + name;
     int width, height, nrChannels;
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
     if (data)
@@ -33,16 +42,6 @@ void Texture::init() {  //TODO Expand size of this dude
     }
     else
     {
-        spdlog::error( "Failed to load texture");
+        spdlog::error( "Failed to load texture"  + name);
     }
 }
-
-
-void Texture::use() {
-   // glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, ID);
-}
-Texture::~Texture() { 
-    glDeleteTextures(1,&ID); 
-}
-

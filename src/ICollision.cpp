@@ -8,8 +8,14 @@
 
 int ICollision::nextID = 0;
 
-ICollision::ICollision(CollsionTypeEnum collsionType, bool isKinematic) : collsionType(collsionType),
+ICollision::ICollision(CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 scale) : collsionType(collsionType),
                                                                           isKinematic(isKinematic) {
+    if(collsionType == Square){
+        setReactPoints(glm::vec4(-scale.x/2,scale.x/2,-scale.y/2,+scale.y/2) );
+    }else{
+        radius = scale.x/2;
+    }
+    
     uniqueID = nextID++; // Assign the current value of nextID and then increment it for the next instance
 }
 
@@ -31,7 +37,11 @@ void ICollision::detectCollisions(const std::vector<ICollision> otherObjects) {
                 }
             }
         }
-        meanSeparationVector = SumOfSeperationVector / (float) amountOfCollisions;
+        if (amountOfCollisions == 0){
+            meanSeparationVector = glm::vec2(0);
+        }else{
+            meanSeparationVector = SumOfSeperationVector / (float) amountOfCollisions;
+        }
     }
 }
 
@@ -120,7 +130,9 @@ glm::vec2 ICollision::CircleSeparationVector(const ICollision &object) { // Coul
 }
 
 void ICollision::seperateObject() {
-    this->transform.position += meanSeparationVector;
+    if (meanSeparationVector != glm:: vec2(0)){
+        this->transform.position += meanSeparationVector;
+    }
 }
 
 void ICollision::bounceObject() {

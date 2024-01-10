@@ -9,20 +9,20 @@
 #include <iostream>
 #include "spdlog/spdlog.h"
 using namespace gl;
+using namespace std;
 
 class Texture{
 public:
-    Texture(const char* texturePath) :texturePath(texturePath) {}
+    Texture(string name , string directory,string type) ;
     ~Texture();
     // the texture ID
     GLuint ID{}; // TODO add more than one texture on top of it
-    
+    string type;
+    string name;
+    string directory;
+
     // constructor reads and builds the texture
-    void use();
-    void init();
-    
-private:
-    const char* texturePath;
+    void use(GLenum GL_TEXTUREX);
 };
 
 
