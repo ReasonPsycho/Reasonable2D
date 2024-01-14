@@ -15,7 +15,6 @@
 #include "ICollision.h"
 #include "IRenderable.h"
 
-using namespace gl;
 
 class Squere : public ICollision, public IRenderable, public virtual ITransform{ // A class to hold cube (to test concept)
 public:

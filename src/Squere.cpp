@@ -5,7 +5,6 @@
 #include "Squere.h"
 #include "Utilities/Shader.h"
 #include "Utilities/Texture.h"
-using namespace gl;
 
 /*
     const int numSegments = 100; // Number of segments in the circle

@@ -8,7 +8,6 @@
 #include "spdlog/spdlog.h"
 #include "Tile.h"
 
-using namespace gl;
 
 void MapSystem::init() {
     // Create vertex array object (VAO)

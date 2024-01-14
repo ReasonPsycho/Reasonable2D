@@ -15,15 +15,12 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/random.inl"
 #include "MapSystem.h"
+#include "glad/glad.h"
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 
 //#include <glad/glad.h>  // Initialize with gladLoadGL()
 
-#include <glbinding/glbinding.h>
-#include <glbinding/gl/gl.h>
-
-using namespace gl;
 
 //Instancing
 #include <glm/glm.hpp>
@@ -145,8 +142,8 @@ int main(int, char **) {
     spdlog::info("Initialized camera and viewport.");
 
     // configure global opengl state
-    glEnable(static_cast<gl::GLenum>(GL_DEPTH_TEST));
-    glDepthFunc(static_cast<gl::GLenum>(GL_LESS));
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
 #pragma endregion Init
 
@@ -214,15 +211,11 @@ bool init() {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable VSync - fixes FPS at the refresh rate of your screen
-    glbinding::initialize(glfwGetProcAddress);
-    /* was used for glads
     bool err = !gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
-
     if (err) {
         spdlog::error("Failed to initialize OpenGL loader!");
         return false;
     }
-    */
     return true;
 }
 
@@ -276,7 +269,7 @@ void update() {
 
 void render() {
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-    glClear(static_cast<ClearBufferMask>(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     camera.Position = glm::vec3 (squere->transform.position,0);
     camera.UpdateShader(&ourShader, display_w, display_h);

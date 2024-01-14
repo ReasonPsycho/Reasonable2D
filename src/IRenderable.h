@@ -10,8 +10,6 @@
 #include "Utilities/Shader.h"
 #include "Utilities/Texture.h"
 
-#include <glbinding/gl/gl.h>
-using namespace gl;
 
 
 class IRenderable : virtual public ITransform{
