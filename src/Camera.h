@@ -55,7 +55,8 @@ public:
     
     // Returns view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix();
-
+    glm::vec3 ScreenToWorld(glm::vec3 screenPos);
+    
     //InputProcessing added delta time with predefintion of one (for cases where it takes to long to implement it)
     void ProcessKeyboard(Camera_Movement direction, float deltaTime= 1);
     void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true,float deltaTime = 1);
@@ -66,6 +67,8 @@ public:
 private:
     // calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors();
+    int screenWidth;
+    int screenHeight;
 };
 
 

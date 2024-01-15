@@ -7,8 +7,8 @@
 #include "Utilities/Shader.h"
 #include "Utilities/Texture.h"
 #include "Squere.h"
+#include "Circlee.h"
 #include "Camera.h"
-#include "Crircle.h"
 #include <stdio.h>
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
@@ -102,6 +102,7 @@ int display_w, display_h;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = 0;
 float lastY = 0;
+glm::vec2 keyMove = glm::vec2(0);
 
 bool ballsBounce = true;
 bool ballsSeperate = true;
@@ -110,10 +111,10 @@ bool wallsSeperate = true;
 int amountOfCircles = 200;
 
 Shader ourShader("res/shaders/basic.vert", "res/shaders/basic.frag");
-Crircle circle(glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 0.01f), .5f, 1.5f);
 MapSystem mapSystem(&ourShader);
 
 Squere *squere;
+Circlee *circle;
 
 // timing
 float deltaTime = 0.0f;
@@ -228,8 +229,10 @@ void init_textures_vertices() {
     ourShader.setInt("ourTexture", 0);
     mapSystem.init();
 
-    squere = new Squere(&ourShader, mapSystem.textureMap["black.jpg"].get(), mapSystem.VAO, Square, false,
-                        glm::vec2(-5, 0), 0, glm::vec2(0), glm::vec2(0.6));
+    squere = new Squere(&ourShader, mapSystem.textureMap["black.jpg"].get(), Square, false,
+                        mapSystem.randomPositionAtEgedeOfTheMap(), 0, glm::vec2(0), glm::vec2(0.5));
+    circle = new Circlee(&ourShader, mapSystem.textureMap["black.jpg"].get(), Circle, false,
+                         mapSystem.randomPositionAtEgedeOfTheMap(), 0, glm::vec2(0), glm::vec2(0.5));
 }
 
 void init_imgui() {
@@ -257,9 +260,10 @@ void before_frame() {
 };
 
 void input() {
+    keyMove = glm::vec2(0);
     processInput(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    //glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
     //glfwSetScrollCallback(window, scroll_callback);
 }
 
@@ -273,15 +277,17 @@ void render() {
 
     camera.Position = glm::vec3 (squere->transform.position,0);
     camera.UpdateShader(&ourShader, display_w, display_h);
+    circle->moveByMousePos(camera.ScreenToWorld(
+             glm::vec3(lastX,lastY,-1)));
 
-    //cube.render(&ourShader,&ourTexture);
-    //circle.render(&ourShader,&ourTexture);
-
-    squere->render();
-    mapSystem.render();
+   // squere->render();
+    circle->render();
+   //mapSystem.render();
     
-    squere->detectCollisions(mapSystem.collisions);
-    squere->seperateObject();
+    //squere->detectCollisions(mapSystem.collisions);
+    //squere->seperateObject();
+    //circle->detectCollisions(mapSystem.collisions);
+    //circle->seperateObject();
 }
 
 void imgui_begin() {
@@ -294,11 +300,16 @@ void imgui_begin() {
 void imgui_render() {
     /// Add new ImGui controls here
     // Show the big demo window
+    std::ostringstream ossX;
+    ossX << std::fixed << std::setprecision(2) << lastX;
+    std::string strlastX = ossX.str();
+    std::ostringstream ossY;
+    ossY << std::fixed << std::setprecision(2) << lastY;
+    std::string strlastY = ossY.str();
     ImGui::Begin("Switch:");
-    ImGui::Checkbox("Does balls separate?", &ballsSeperate);
-    ImGui::Checkbox("Does balls collide?", &ballsBounce);
-    ImGui::Checkbox("Does balls seperate with walls?", &wallsSeperate);
-    ImGui::Checkbox("Does balls collide with walls?", &wallsBounce);
+    ImGui::Text(strlastX.c_str());
+    ImGui::Text(strlastY.c_str());
+    
     //  ImGui::Checkbox("Does balls and walls collide?", &wallsCollide);
     ImGui::End();
 
@@ -312,7 +323,6 @@ void imgui_end() {
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window) {
-    glm::vec2 keyMove = glm::vec2(0);
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
@@ -361,13 +371,13 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
-
+    
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
 
     lastX = xpos;
     lastY = ypos;
-
+    
     // camera.ProcessMouseMovement(xoffset, yoffset, true,deltaTime);
 }
 

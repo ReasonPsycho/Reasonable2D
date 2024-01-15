@@ -16,6 +16,7 @@ class MapSystem {
 public:
     MapSystem(Shader* shader);
     void init();
+    glm::vec2 randomPositionAtEgedeOfTheMap();
     Shader *shader;
     std::map<std::string, std::shared_ptr<Texture>> textureMap;
     std::vector<Tile> tiles;

@@ -27,10 +27,10 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} ${ASSETS_FILES}
         Utilities/Texture.h
         Squere.cpp
         Squere.h
+        Circlee.cpp
+        Circlee.h
         Camera.cpp
         Camera.h
-        Crircle.cpp
-        Crircle.h
         ICollision.cpp
         ICollision.h
         ITransform.cpp

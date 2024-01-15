@@ -60,25 +60,25 @@ glm::vec2 ICollision::SquareSeparationVector(ICollision object) { // Could have 
                 glm::clamp(transform.position.x, object.getRelativeReactPoints().x, object.getRelativeReactPoints().y),
                 glm::clamp(transform.position.y, object.transform.position.y + object.getRelativeReactPoints().z,
                            object.transform.position.y + object.getRelativeReactPoints().w));
-        if (glm::length(transform.position - f) >= radius) {
+        float length = glm::length(transform.position - f);
+        if (length <= radius) {
             if (transform.position != f) {
-                separationVector = ((transform.position - f) / glm::length(transform.position - f)) * (radius - glm::length(transform.position - f));
+                separationVector = ((transform.position - f) / length) * (radius - length);
             } else {
                 float left = transform.position.x - object.getRelativeReactPoints().x + radius;
-                float top = transform.position.y - object.getRelativeReactPoints().z + +radius;
+                float top = transform.position.y - object.getRelativeReactPoints().z + radius;
                 float right = object.getRelativeReactPoints().y - transform.position.x + radius;
                 float bottom = object.getRelativeReactPoints().w - transform.position.y + radius;
                 separationVector = glm::vec2(glm::min(left, right), glm::min(top, bottom));
             }
         }
     } else {
-        //l – left, mniejsza współrzędna x prostokąta, x
-        //r – right, większa współrzędna x prostokąta, y
-        //t – top, mniejsza współrzędna y prostokąta (y rosną w dół!), z
-        //b – bottom, mniejsza współrzędna y prostakąta, w
-        // r1 > l2 ∧ r2 > l1 ∧ b1 > t2 ∧ b2 > t1  
+        //l – left, min x-coordinate of rectangle, x
+        //r – right, max x-coordinate of rectangle, y
+        //t – top, min y-coordinate of rectangle (y increases downwards!), z
+        //b – bottom, max y-coordinate of rectangle, w
+        // r1 > l2 ∧ r2 > l1 ∧ b1 > t2 ∧ b2 > t1
 
-        
         float left = getRelativeReactPoints().y - object.getRelativeReactPoints().x;
         float right = object.getRelativeReactPoints().y - getRelativeReactPoints().x;
         float top = getRelativeReactPoints().w - object.getRelativeReactPoints().z;
@@ -86,12 +86,12 @@ glm::vec2 ICollision::SquareSeparationVector(ICollision object) { // Could have 
         if (left > 0 && right > 0 && top > 0 && bottom > 0){
             if (left < right){
                 separationVector.x = -left;
-            }else{
+            } else{
                 separationVector.x = right;
             }
             if (top < bottom){
                 separationVector.y = -top;
-            }else{
+            } else{
                 separationVector.y = bottom;
             }
         }

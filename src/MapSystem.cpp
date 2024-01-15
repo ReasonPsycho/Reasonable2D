@@ -7,6 +7,7 @@
 #include "MapSystem.h"
 #include "spdlog/spdlog.h"
 #include "Tile.h"
+#include "glm/gtc/random.hpp"
 
 
 void MapSystem::init() {
@@ -46,7 +47,7 @@ void MapSystem::init() {
     glEnableVertexAttribArray(1);
     
     // Step 3: Open the JSON file
-    std::ifstream file("res/levels/1st.json");
+    std::ifstream file("res/levels/level.json");
 
     if (!file.is_open()) {
         std::cout << "Failed to open JSON file." << std::endl;
@@ -115,4 +116,12 @@ void MapSystem::render() {
     for (int i = 0; i < tiles.size(); i++) {
         tiles[i].render();
     }
+}
+
+glm::vec2 MapSystem::randomPositionAtEgedeOfTheMap() {
+    Tile tile= tiles[0]; // Should have collison lol;
+    while(tile.texture == textureMap["black.jpg"].get()){
+        tile= tiles[(int)glm::linearRand(0, (int)tiles.size())];
+    }
+    return tile.transform.position;
 }

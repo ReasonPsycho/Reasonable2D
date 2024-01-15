@@ -85,11 +85,37 @@ void Camera::updateCameraVectors() {
 }
 
 void Camera::UpdateShader(Shader* shader,int display_w,int display_h) {
+     screenWidth = display_w;
+    screenHeight = display_h;
     // pass projection matrix to shader 
-    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)display_w / (float)display_h, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
     shader->setMatrix4("projection", false, glm::value_ptr(projection));
 
     // camera/view transformation
     glm::mat4 view = GetViewMatrix();
     shader->setMatrix4("view", false, glm::value_ptr(view));
+}
+
+
+glm::vec3 Camera::ScreenToWorld(glm::vec3 screenPos)
+{
+    glReadPixels(screenPos.x, screenPos.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &screenPos.z);
+    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+    glm::mat4 view = GetViewMatrix();
+    glm::vec4 screenPos_ndc = glm::vec4(
+            screenPos.x / (float)screenWidth * 2.0f - 1.0f,
+            ((float )screenHeight - screenPos.y) / (float)screenHeight * 2.0f - 1.0f,  // flip the y axis
+            2.0f * screenPos.z - 1.0f,
+            1.0f
+    );
+    glm::mat4 inverseVP = glm::inverse(projection * view);
+    glm::vec4 worldPos_homogeneous = inverseVP * screenPos_ndc;
+
+    glm::vec3 worldPos = glm::vec3(
+            worldPos_homogeneous.x / worldPos_homogeneous.w,
+            worldPos_homogeneous.y / worldPos_homogeneous.w,
+            worldPos_homogeneous.z / worldPos_homogeneous.w
+    );
+
+    return worldPos + Position ;
 }

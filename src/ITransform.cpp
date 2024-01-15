@@ -2,15 +2,22 @@
 // Created by redkc on 02/01/2024.
 //
 
+#include <sstream>
+#include <iomanip>
 #include "ITransform.h"
 #include "glm/common.hpp"
+#include "spdlog/spdlog.h"
 
 void ITransform::moveByMousePos(glm::vec2 mousePosition) {
-    auto diffrenceInX =  mousePosition[0] - transform.position.x;
-    auto diffrenceInY =  mousePosition[1] - transform.position.y;
-    transform.velocity.x = (glm::clamp(-1.0f,diffrenceInX,1.0f) * (1.0f - smooth) +  transform.velocity.x * smooth) * speed;
-    transform.velocity.y = (glm::clamp(-1.0f,diffrenceInY,1.0f)  * (1.0f - smooth) +  transform.velocity.y * smooth)* speed;
-    translate();
+    //auto diffrenceInX =  mousePosition[0] - transform.position.x ;
+   // auto diffrenceInY =  mousePosition[1] - transform.position.y ;
+
+
+  //  transform.velocity.x = (glm::clamp(-1.0f,diffrenceInX,1.0f) * (1.0f - smooth) +  transform.velocity.x * smooth) * speed;
+   // transform.velocity.y = (glm::clamp(-1.0f,diffrenceInY,1.0f)  * (1.0f - smooth) +  transform.velocity.y * smooth)* speed;
+   // translate();
+    transform.position.x = mousePosition[0] /2;
+    transform.position.y = mousePosition[1] /2;
 }
 
 void ITransform::translate(float deltaTime) {

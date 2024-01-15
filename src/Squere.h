@@ -18,7 +18,7 @@
 
 class Squere : public ICollision, public IRenderable, public virtual ITransform{ // A class to hold cube (to test concept)
 public:
-    Squere(Shader *shader, Texture *texture, GLuint vao, CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 position, float rotation, glm::vec2 vel, glm::vec2 scale);
+    Squere(Shader *shader, Texture *texture, CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 position, float rotation, glm::vec2 vel, glm::vec2 scale);
     ~Squere();
 };
 

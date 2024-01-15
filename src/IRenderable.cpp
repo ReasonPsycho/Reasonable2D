@@ -13,13 +13,13 @@ void IRenderable::render() {
     shader->use();
 
     glm::mat4 model(1.0f);
-    model = glm::translate(model, glm::vec3(transform.position, -30.0f));
+    model = glm::translate(model, glm::vec3(transform.position, -50));
     model = glm::scale(model, glm::vec3(transform.scale,1.0f));
     shader->setMatrix4("transform", false, glm::value_ptr(model));
-    shader->setVec3("lightColor", 1.0f, 0.0f, 1.0f);
+    shader->setVec3("lightColor",255.0f, 255.0f, 255.0f);
 
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, vertexCount);
 }
 
 IRenderable::IRenderable(Shader* shader, Texture* texture,GLuint VAO): shader(shader),texture(texture),VAO(VAO) {
@@ -27,5 +27,9 @@ IRenderable::IRenderable(Shader* shader, Texture* texture,GLuint VAO): shader(sh
 }
 
 IRenderable::~IRenderable() {
+
+}
+
+IRenderable::IRenderable(Shader* shader, Texture* texture): shader(shader),texture(texture) {
 
 }

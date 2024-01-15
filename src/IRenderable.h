@@ -15,14 +15,15 @@
 class IRenderable : virtual public ITransform{
 public:
     IRenderable(Shader* shader, Texture* texture,GLuint VAO) ;
+    IRenderable(Shader* shader, Texture* texture) ;
     ~IRenderable();
     Shader *shader;
     Texture *texture;
     GLuint VAO;
-    GLuint FBO;
+    GLuint VBO;
     GLuint EBO;
     float opacity;
-
+    int vertexCount;
     void render();
 };
 
