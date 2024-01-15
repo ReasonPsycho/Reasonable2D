@@ -52,6 +52,10 @@ public:
     //Constructors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
     Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
+
+    // Set up viewports
+    void  SetUpSingleGlViewport(int width,int height);
+    void  SetUpSplitGlViewport(int i,int width,int height);
     
     // Returns view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix();
@@ -63,12 +67,14 @@ public:
     void ProcessMouseScroll(float yoffset, float deltaTime = 1);
     
     //updates shader values
-    void UpdateShader(Shader* shader,int display_w,int display_h);
+    void UpdateShader(Shader* shader);
 private:
     // calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors();
     int screenWidth;
     int screenHeight;
+    int widnowWidth;
+    int widnowHeight;
 };
 
 

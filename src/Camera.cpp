@@ -84,9 +84,8 @@ void Camera::updateCameraVectors() {
     Up    = glm::normalize(glm::cross(Right, Front));
 }
 
-void Camera::UpdateShader(Shader* shader,int display_w,int display_h) {
-     screenWidth = display_w;
-    screenHeight = display_h;
+void Camera::UpdateShader(Shader* shader) {
+
     // pass projection matrix to shader 
     glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
     shader->setMatrix4("projection", false, glm::value_ptr(projection));
@@ -99,8 +98,9 @@ void Camera::UpdateShader(Shader* shader,int display_w,int display_h) {
 
 glm::vec3 Camera::ScreenToWorld(glm::vec3 screenPos)
 {
-    glReadPixels(screenPos.x, screenPos.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &screenPos.z);
-    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+    glReadPixels(screenPos.x, screenPos.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &screenPos.z); // This is useless at this point buuuuut it's probably usefully to save that
+    screenPos.z = 1;
+    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)widnowWidth / (float)widnowHeight, 0.1f, 100.0f);
     glm::mat4 view = GetViewMatrix();
     glm::vec4 screenPos_ndc = glm::vec4(
             screenPos.x / (float)screenWidth * 2.0f - 1.0f,
@@ -118,4 +118,25 @@ glm::vec3 Camera::ScreenToWorld(glm::vec3 screenPos)
     );
 
     return worldPos + Position ;
+}
+
+void Camera::SetUpSingleGlViewport(int width, int height) {
+    glViewport(0, 0, width, height);
+    screenWidth = width;
+    screenHeight = height;
+    widnowWidth = width;
+    widnowHeight = height;
+}
+
+void Camera::SetUpSplitGlViewport(int i,int width, int height) {
+    if(i == 0){
+        glViewport(0, 0, width/2, height);
+    }else{
+        glViewport( width/2, 0, width/2, height);
+        
+    }
+    screenWidth = width/2;
+    screenHeight = height;
+    widnowWidth = width;
+    widnowHeight = height;
 }

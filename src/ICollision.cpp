@@ -19,7 +19,7 @@ ICollision::ICollision(CollsionTypeEnum collsionType, bool isKinematic,glm::vec2
     uniqueID = nextID++; // Assign the current value of nextID and then increment it for the next instance
 }
 
-void ICollision::detectCollisions(const std::vector<ICollision> otherObjects) {
+bool ICollision::detectCollisions(const std::vector<ICollision> otherObjects) {
     if (!isKinematic) { // I won't care and just u know do it for all of them XD
         glm::vec2 SumOfSeperationVector = glm::vec2(0);
         int amountOfCollisions = 0;
@@ -42,6 +42,8 @@ void ICollision::detectCollisions(const std::vector<ICollision> otherObjects) {
         }else{
             meanSeparationVector = SumOfSeperationVector / (float) amountOfCollisions;
         }
+    
+        return amountOfCollisions != 0;
     }
 }
 
@@ -58,8 +60,7 @@ glm::vec2 ICollision::SquareSeparationVector(ICollision object) { // Could have 
     if (this->collsionType == Circle) {
         glm::vec2 f = glm::vec2(
                 glm::clamp(transform.position.x, object.getRelativeReactPoints().x, object.getRelativeReactPoints().y),
-                glm::clamp(transform.position.y, object.transform.position.y + object.getRelativeReactPoints().z,
-                           object.transform.position.y + object.getRelativeReactPoints().w));
+                glm::clamp(transform.position.y,  object.getRelativeReactPoints().z, object.getRelativeReactPoints().w));
         float length = glm::length(transform.position - f);
         if (length <= radius) {
             if (transform.position != f) {
@@ -93,6 +94,11 @@ glm::vec2 ICollision::SquareSeparationVector(ICollision object) { // Could have 
                 separationVector.y = -top;
             } else{
                 separationVector.y = bottom;
+            }
+            if(abs(separationVector.x) < abs(separationVector.y)){
+                separationVector.y = 0;
+            } else if (abs(separationVector.x) != abs(separationVector.y)) {
+                separationVector.x = 0;
             }
         }
     }

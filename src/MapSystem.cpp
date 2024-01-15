@@ -47,7 +47,7 @@ void MapSystem::init() {
     glEnableVertexAttribArray(1);
     
     // Step 3: Open the JSON file
-    std::ifstream file("res/levels/level.json");
+    std::ifstream file(path);
 
     if (!file.is_open()) {
         std::cout << "Failed to open JSON file." << std::endl;
@@ -86,21 +86,21 @@ void MapSystem::init() {
 
     const rapidjson::Value &loadedTiles = document["tiles"];
     if (loadedTiles.IsArray()) {
-        spdlog::info("IsArray!!!");
         for (rapidjson::SizeType i = 0; i < loadedTiles.Size(); i++) {
             const rapidjson::Value &tile = loadedTiles[i];
             if (tile.IsObject()) {
-                spdlog::info("IsArray!!!");
 
                 if (tile.HasMember("x") && tile.HasMember("y") && tile.HasMember("texture")) {
                     int x = tile["x"].GetFloat();
                     int y = tile["y"].GetFloat();
                     std::string texture = tile["texture"].GetString();
 
-                    spdlog::info(std::to_string(x) + " " + std::to_string(y));
-                    tiles.push_back(*new Tile(shader, textureMap[texture].get(), VAO, Square, true,glm::vec2(x,y),0,glm::vec2(0),glm::vec2(1)));
+                    tiles.push_back(*new Tile(shader, textureMap[texture].get(), VAO, Square, true,glm::vec2(x * 5,y * 5),0,glm::vec2(0),glm::vec2(5)));
                     if (texture == "black.jpg"){
                         collisions.push_back(tiles[i]);
+                    }
+                    if (texture == "red.jpg"){
+                        goals.push_back(tiles[i]);
                     }
                 }
             }
@@ -108,7 +108,7 @@ void MapSystem::init() {
     }
 }
 
-MapSystem::MapSystem(Shader *shader) : shader(shader) {
+MapSystem::MapSystem(Shader *shader,string path) : shader(shader), path(path) {
   
 }
 
@@ -124,4 +124,17 @@ glm::vec2 MapSystem::randomPositionAtEgedeOfTheMap() {
         tile= tiles[(int)glm::linearRand(0, (int)tiles.size())];
     }
     return tile.transform.position;
+}
+
+glm::vec2 MapSystem::closestGoal(glm::vec2 currentPos) {
+    float length = 1000000;
+    glm::vec2 returnPos = glm::vec2(0);
+    for(int i = 0; i < goals.size();i++){
+        float tmpLength = glm::length(goals[i].transform.position - currentPos);
+        if(length > tmpLength){
+            returnPos =goals[i].transform.position;
+            length = tmpLength;
+        }
+    }
+    return returnPos;
 }

@@ -25,8 +25,8 @@ public:
     glm::vec2 scale= glm::vec2(0));
     Transform transform;
     float smooth = 0.1f;//Q: WIll this slow down this A: Yes and what
-    float speed = 2.5f;
-    
+    float speed = 5.0f;
+    float rotateTowardsPosition2D(const glm::vec2& targetPosition); 
     void moveByMousePos(glm::vec2 mousePosition);
     void moveByInputVector(glm::vec2 mousePosition);
     void translate(float deltaTime = 0.01f);

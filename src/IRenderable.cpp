@@ -9,11 +9,14 @@
 
 
 void IRenderable::render() {
+    
     texture->use(GL_TEXTURE0);
     shader->use();
 
     glm::mat4 model(1.0f);
     model = glm::translate(model, glm::vec3(transform.position, -50));
+    if(transform.rotation != 0) 
+        model = glm::rotate(model,transform.rotation + 1.7f,glm::vec3 (0,0,1));
     model = glm::scale(model, glm::vec3(transform.scale,1.0f));
     shader->setMatrix4("transform", false, glm::value_ptr(model));
     shader->setVec3("lightColor",255.0f, 255.0f, 255.0f);

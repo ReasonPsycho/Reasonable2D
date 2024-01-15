@@ -19,7 +19,7 @@ enum CollsionTypeEnum{
 class ICollision : virtual public ITransform {
 public:
     ICollision(CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 scale = glm::vec2(1));
-    void detectCollisions(const std::vector<ICollision> otherObjects);
+    bool detectCollisions(const std::vector<ICollision> otherObjects);
     void seperateObject();
     void bounceObject();
     CollsionTypeEnum collsionType;
