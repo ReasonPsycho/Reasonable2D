@@ -28,7 +28,7 @@ public:
     float speed = 5.0f;
     float rotateTowardsPosition2D(const glm::vec2& targetPosition); 
     void moveByMousePos(glm::vec2 mousePosition);
-    void moveByInputVector(glm::vec2 mousePosition);
+    void moveByInputVector(glm::vec2 mousePosition,float deltaTime);
     void translate(float deltaTime = 0.01f);
 };
 

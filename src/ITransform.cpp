@@ -23,15 +23,15 @@ void ITransform::moveByMousePos(glm::vec2 mousePosition) {
     
 }
 
-void ITransform::translate(float deltaTime) {
+void ITransform::translate(float deltaTime ) {
     transform.position.x +=  transform.velocity.x * deltaTime;
     transform.position.y +=  transform.velocity.y * deltaTime;
 }
 
-void ITransform::moveByInputVector(glm::vec2 inputVector) {
+void ITransform::moveByInputVector(glm::vec2 inputVector,float deltaTime) {
     transform.velocity.x = (inputVector.x * (1.0f - smooth) + transform.velocity.x * smooth) * speed;
     transform.velocity.y = (inputVector.y * (1.0f - smooth) + transform.velocity.y * smooth) * speed;
-    translate();
+    translate(deltaTime);
 }
 
 ITransform::ITransform(glm::vec2 position, float rotation, glm::vec2 vel, glm::vec2 scale) : transform(position,rotation,vel,scale){

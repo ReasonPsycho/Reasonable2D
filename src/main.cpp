@@ -284,8 +284,8 @@ void input() {
 }
 
 void update() {
-    squere->moveByInputVector(keyMove);
-    circle->moveByInputVector(keyMove2);
+    squere->moveByInputVector(keyMove,deltaTime);
+    circle->moveByInputVector(keyMove2,deltaTime);
     firstPlayerArrow->transform.position = squere->transform.position;
     secondPlayerArrow->transform.position = circle->transform.position;
     firstPlayerArrow->transform.rotation = firstPlayerArrow->rotateTowardsPosition2D(mapSystems[playerMap].closestGoal(firstPlayerArrow->transform.position));
@@ -312,7 +312,7 @@ void update() {
         spdlog::info("ReachedGoal!");
         if(player2Map < 2){
             player2Map++;
-            squere->transform.position = mapSystems[player2Map].randomPositionAtEgedeOfTheMap();
+            circle->transform.position = mapSystems[player2Map].randomPositionAtEgedeOfTheMap();
         }else{
             player2Won = true;
         }
