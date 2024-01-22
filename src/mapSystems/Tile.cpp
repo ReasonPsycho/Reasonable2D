@@ -9,11 +9,13 @@ Tile::Tile(Shader *shader, Texture *texture, GLuint vao, CollsionTypeEnum collsi
     vertexCount = 6;
 }
 
-void Tile::imgui_render(std::map<std::string, std::shared_ptr<Texture>> textureMap) {
+void Tile::imgui_render(std::map<std::string, std::shared_ptr<Texture>> textureMap,Camera* camera) {
     ImGui::PushID(uniqueID);
     string  name  = "Tile nr:" + std::to_string(uniqueID);
-    if (ImGui::TreeNode(name.c_str())) {
-        ITransform::imgui_render();
+
+    // TreeNode takes the current state 'isTreeOpen' as a parameter
+    if (ImGui::TreeNodeEx(name.c_str(), isNodeOpen ? ImGuiTreeNodeFlags_DefaultOpen : 0)) {
+        ITransform::imgui_render(camera);
         IRenderable::imgui_select_new_texture(textureMap);
         ImGui::TreePop();
     }

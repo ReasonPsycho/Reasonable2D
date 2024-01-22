@@ -124,16 +124,16 @@ glm::vec2 MapSystem::randomPositionAtEgedeOfTheMap() {
     while(tile.texture == textureMap["black.jpg"].get()){
         tile= tiles[(int)glm::linearRand(0, (int)tiles.size())];
     }
-    return tile.transform.position;
+    return tile.transform.position();
 }
 
 glm::vec2 MapSystem::closestGoal(glm::vec2 currentPos) {
     float length = 1000000;
     glm::vec2 returnPos = glm::vec2(0);
     for(int i = 0; i < goals.size();i++){
-        float tmpLength = glm::length(goals[i].transform.position - currentPos);
+        float tmpLength = glm::length(goals[i].transform.position() - currentPos);
         if(length > tmpLength){
-            returnPos =goals[i].transform.position;
+            returnPos =goals[i].transform.position();
             length = tmpLength;
         }
     }

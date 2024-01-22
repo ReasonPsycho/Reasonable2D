@@ -29,7 +29,9 @@ public:
     std::vector<Tile> tiles;
     
     void render();
-    void imgui_render();
+    void imgui_render(Camera* camera);
+    
+    std::vector<Tile*> checkForTiles(glm::vec2 pos);
     
     void load();
     void save(string savePath);
@@ -41,6 +43,7 @@ private:
     std::vector<char> nameBuffer;
     std::vector<char> pathBuffer;
 };
+
 
 
 #endif //OPENGLGP_MAPSYSTEM_H

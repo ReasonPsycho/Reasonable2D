@@ -54,7 +54,6 @@ add_library(imguizmo STATIC ${ImGuizmo_SOURCE_DIR}/ImGuizmo.cpp
         ${ImGuizmo_SOURCE_DIR}/ImGradient.cpp
         ${ImGuizmo_SOURCE_DIR}/ImSequencer.cpp)
 
-
 set_target_properties(glad
         stb_image
         assimp

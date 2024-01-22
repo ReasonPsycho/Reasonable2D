@@ -59,17 +59,17 @@ glm::vec2 ICollision::SquareSeparationVector(ICollision object) { // Could have 
     glm::vec2 separationVector = glm::vec2(0);
     if (this->collsionType == Circle) {
         glm::vec2 f = glm::vec2(
-                glm::clamp(transform.position.x, object.getRelativeReactPoints().x, object.getRelativeReactPoints().y),
-                glm::clamp(transform.position.y,  object.getRelativeReactPoints().z, object.getRelativeReactPoints().w));
-        float length = glm::length(transform.position - f);
+                glm::clamp(transform.position().x, object.getRelativeReactPoints().x, object.getRelativeReactPoints().y),
+                glm::clamp(transform.position().y,  object.getRelativeReactPoints().z, object.getRelativeReactPoints().w));
+        float length = glm::length(transform.position() - f);
         if (length <= radius) {
-            if (transform.position != f) {
-                separationVector = ((transform.position - f) / length) * (radius - length);
+            if (transform.position() != f) {
+                separationVector = ((transform.position() - f) / length) * (radius - length);
             } else {
-                float left = transform.position.x - object.getRelativeReactPoints().x + radius;
-                float top = transform.position.y - object.getRelativeReactPoints().z + radius;
-                float right = object.getRelativeReactPoints().y - transform.position.x + radius;
-                float bottom = object.getRelativeReactPoints().w - transform.position.y + radius;
+                float left = transform.position().x - object.getRelativeReactPoints().x + radius;
+                float top = transform.position().y - object.getRelativeReactPoints().z + radius;
+                float right = object.getRelativeReactPoints().y - transform.position().x + radius;
+                float bottom = object.getRelativeReactPoints().w - transform.position().y + radius;
                 separationVector = glm::vec2(glm::min(left, right), glm::min(top, bottom));
             }
         }
@@ -107,26 +107,26 @@ glm::vec2 ICollision::SquareSeparationVector(ICollision object) { // Could have 
 
 glm::vec2 ICollision::CircleSeparationVector(const ICollision &object) { // Could have prob done it better but eh
     if (this->collsionType == Circle) {
-        float distance = abs(object.transform.position - transform.position).length();
+        float distance = abs(object.transform.position() - transform.position()).length();
         if (distance < radius + object.radius) {
             glm::vec2 separationVector =
-                    ((transform.position - object.transform.position) / glm::length(transform.position - object.transform.position)) *
-                    (radius + object.radius - glm::length(transform.position - object.transform.position));
+                    ((transform.position() - object.transform.position()) / glm::length(transform.position() - object.transform.position())) *
+                    (radius + object.radius - glm::length(transform.position() - object.transform.position()));
             return separationVector;
         }
     } else {
-        glm::vec2 f = glm::vec2(glm::clamp(object.transform.position.x, getRelativeReactPoints().x, getRelativeReactPoints().y),
-                                glm::clamp(object.transform.position.y, getRelativeReactPoints().z, getRelativeReactPoints().w));
-        if (glm::length(object.transform.position - f) >= object.radius) {
+        glm::vec2 f = glm::vec2(glm::clamp(object.transform.position().x, getRelativeReactPoints().x, getRelativeReactPoints().y),
+                                glm::clamp(object.transform.position().y, getRelativeReactPoints().z, getRelativeReactPoints().w));
+        if (glm::length(object.transform.position() - f) >= object.radius) {
             glm::vec2 separationVector = glm::vec2(0);
-            if (object.transform.position != f) {
-                separationVector = ((object.transform.position - f) / glm::length(object.transform.position - f)) *
-                                   (object.radius - glm::length(object.transform.position - f));
+            if (object.transform.position() != f) {
+                separationVector = ((object.transform.position() - f) / glm::length(object.transform.position() - f)) *
+                                   (object.radius - glm::length(object.transform.position() - f));
             } else {
-                float left = object.transform.position.x - getRelativeReactPoints().x + object.radius;
-                float top = object.transform.position.y - getRelativeReactPoints().z + object.radius;
-                float right = getRelativeReactPoints().y - object.transform.position.x + object.radius;
-                float bottom = getRelativeReactPoints().w - object.transform.position.y + object.radius;
+                float left = object.transform.position().x - getRelativeReactPoints().x + object.radius;
+                float top = object.transform.position().y - getRelativeReactPoints().z + object.radius;
+                float right = getRelativeReactPoints().y - object.transform.position().x + object.radius;
+                float bottom = getRelativeReactPoints().w - object.transform.position().y + object.radius;
                 separationVector = glm::vec2(glm::min(left, right), glm::min(top, bottom));
             }
             return separationVector;
@@ -137,13 +137,13 @@ glm::vec2 ICollision::CircleSeparationVector(const ICollision &object) { // Coul
 
 void ICollision::seperateObject() {
     if (meanSeparationVector != glm:: vec2(0)){
-        this->transform.position += meanSeparationVector;
+        this->transform.position() += meanSeparationVector;
     }
 }
 
 void ICollision::bounceObject() {
     glm::vec2 normalizedSeparation = meanSeparationVector;
-    this->transform.velocity += normalizedSeparation;
+    this->transform.velocity() += normalizedSeparation;
 }
 
 void ICollision::setReactPoints(glm::vec4 newReactPoints) {
@@ -151,8 +151,8 @@ void ICollision::setReactPoints(glm::vec4 newReactPoints) {
 }
 
 const glm::vec4 ICollision::getRelativeReactPoints() {
-    return {reactPoints.x + transform.position.x, reactPoints.y + transform.position.x, reactPoints.z + transform.position.y,
-            reactPoints.w + transform.position.y};
+    return {reactPoints.x + transform.position().x, reactPoints.y + transform.position().x, reactPoints.z + transform.position().y,
+            reactPoints.w + transform.position().y};
 }
 
 const glm::vec4 ICollision::getReactPoints() {

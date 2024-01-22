@@ -137,6 +137,7 @@ int main(int, char **) {
     init_camera();
     spdlog::info("Initialized camera and viewport.");
 
+    
     // configure global opengl state
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -145,6 +146,7 @@ int main(int, char **) {
 
 #pragma endregion Init
 
+    
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         //Setting up things for the rest of functionalities (ex. delta time)
@@ -194,6 +196,7 @@ bool init() {
         return false;
     }
 
+    
     // GL 4.6 + GLSL 460
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_VERSION_MAJOR);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_VERSION_MINOR);
@@ -274,7 +277,7 @@ void render() {
 
     camera.SetUpSingleGlViewport(display_w, display_h);
 
-    camera.Position = glm::vec3(squere->transform.position, 0);
+    camera.Position = glm::vec3(squere->transform.position(), 0);
     camera.UpdateShader(&ourShader);
 
     squere->render();
@@ -286,10 +289,11 @@ void imgui_begin() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
 }
 
 void imgui_render() {
-    mapEditor.imgui_render();
+    mapEditor.imgui_render(&camera);
 }
 
 void imgui_end() {

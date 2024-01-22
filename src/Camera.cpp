@@ -5,8 +5,7 @@
 #include "Camera.h"
 
 
-
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch,float nearClip, float farClip) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM),nearClip(nearClip),farClip(farClip)
 {
     Position = position;
     WorldUp = up;
@@ -85,9 +84,9 @@ void Camera::updateCameraVectors() {
 }
 
 void Camera::UpdateShader(Shader* shader) {
-
+    shader->use();
     // pass projection matrix to shader 
-    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+    glm::mat4 projection = GetProjectionMatrix();
     shader->setMatrix4("projection", false, glm::value_ptr(projection));
 
     // camera/view transformation
@@ -95,12 +94,15 @@ void Camera::UpdateShader(Shader* shader) {
     shader->setMatrix4("view", false, glm::value_ptr(view));
 }
 
+glm::mat4 Camera::GetProjectionMatrix() {
+    return  glm::perspective(glm::radians(Zoom), (float)screenWidth / (float)screenHeight, nearClip, farClip);
+}
+
 
 glm::vec3 Camera::ScreenToWorld(glm::vec3 screenPos)
 {
-    glReadPixels(screenPos.x, screenPos.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &screenPos.z); // This is useless at this point buuuuut it's probably usefully to save that
-    screenPos.z = 1;
-    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)widnowWidth / (float)widnowHeight, 0.1f, 100.0f);
+    glReadPixels(screenPos.x, screenHeight-screenPos.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &screenPos.z); // This is useless at this point buuuuut it's probably usefully to save that
+    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)screenWidth / (float)screenHeight, nearClip, farClip);
     glm::mat4 view = GetViewMatrix();
     glm::vec4 screenPos_ndc = glm::vec4(
             screenPos.x / (float)screenWidth * 2.0f - 1.0f,
@@ -117,7 +119,7 @@ glm::vec3 Camera::ScreenToWorld(glm::vec3 screenPos)
             worldPos_homogeneous.z / worldPos_homogeneous.w
     );
 
-    return worldPos + Position ;
+    return worldPos  ;
 }
 
 void Camera::SetUpSingleGlViewport(int width, int height) {

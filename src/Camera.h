@@ -28,6 +28,8 @@ const float PITCH       =  0.0f;
 const float SPEED       =  2.5f;
 const float SENSITIVITY =  5.0f;
 const float ZOOM        =  45.0f;
+const float NEARCLIP        =  0.1f;
+const float FARCLIP        =  100.0f;
 
 
 
@@ -48,9 +50,12 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
-
+    
+    float nearClip;
+    float farClip;
+    
     //Constructors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH,float nearClip = NEARCLIP, float farClip = FARCLIP);
     Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
 
     // Set up viewports
@@ -59,6 +64,8 @@ public:
     
     // Returns view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix();
+    glm::mat4 GetProjectionMatrix();
+
     glm::vec3 ScreenToWorld(glm::vec3 screenPos);
     
     //InputProcessing added delta time with predefintion of one (for cases where it takes to long to implement it)

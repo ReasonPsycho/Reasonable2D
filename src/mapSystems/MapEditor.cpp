@@ -46,12 +46,13 @@ void MapEditor::init() {
 
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    
+
     load();
-    
+
 }
 
-MapEditor::MapEditor(Shader *shader, string path) : shader(shader), path(path), buffer(100), nameBuffer(100), pathBuffer(100) {
+MapEditor::MapEditor(Shader *shader, string path) : shader(shader), path(path), buffer(100), nameBuffer(100),
+                                                    pathBuffer(100) {
 
 }
 
@@ -87,9 +88,9 @@ void MapEditor::save(string savePath) {
     for (const auto &tile: tiles) {
         writer.StartObject();
         writer.Key("x");
-        writer.Double(tile.transform.position.x);  // Assuming the Tile class has getX() method
+        writer.Double(tile.transform.position().x);  // Assuming the Tile class has getX() method
         writer.Key("y");
-        writer.Double(tile.transform.position.y);  // Assuming the Tile class has getY() method
+        writer.Double(tile.transform.position().y);  // Assuming the Tile class has getY() method
         writer.Key("texture");
         writer.String(tile.texture->name.c_str());  // Assuming the Tile class has getTextureName() method
         writer.EndObject();
@@ -169,8 +170,21 @@ void MapEditor::load() {
     }
 }
 
-void MapEditor::imgui_render() {
 
+void MapEditor::imgui_render(Camera *camera) {
+    if (ImGui::IsMouseClicked(1) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
+        ImVec2 pos = ImGui::GetMousePos();
+        std::vector<Tile *> matchingTiles = checkForTiles(camera->ScreenToWorld(glm::vec3(pos.x, pos.y, -50.0f)));
+
+        if (!matchingTiles.empty()) {
+            for (int i = 0; i < tiles.size(); ++i) {
+                tiles[i].isNodeOpen = false;
+            }
+        }
+        for (int i = 0; i < matchingTiles.size(); ++i) {
+            matchingTiles[i]->isNodeOpen = true;
+        }
+    }
     ImGui::Begin("Map editor");
     std::copy(path.begin(), path.end(), buffer.begin());
     buffer[path.size()] = '\0';
@@ -190,23 +204,34 @@ void MapEditor::imgui_render() {
             ImGui::Text(nameTexture.first.c_str());
         }
         // Create a buffer with a maximum size of your choice.
-  
+
         ImGui::InputText("Texture name", nameBuffer.data(), nameBuffer.size());
         ImGui::InputText("Texture path", pathBuffer.data(), pathBuffer.size());
         if (ImGui::Button("Add texture")) {
-            textureMap[nameBuffer.data()] = make_shared<Texture>( nameBuffer.data(),pathBuffer.data(), "");
+            textureMap[nameBuffer.data()] = make_shared<Texture>(nameBuffer.data(), pathBuffer.data(), "");
         }
 
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Tiles")) {
         for (auto &tile: tiles) {
-            tile.imgui_render(textureMap);
+            tile.imgui_render(textureMap, camera);
         }
         ImGui::TreePop();
     };
 
     ImGui::End();
+}
+
+std::vector<Tile *> MapEditor::checkForTiles(glm::vec2 pos) {
+    std::vector<Tile *> matchingTiles;
+    for (int i = 0; i < tiles.size(); i++) {
+
+        if (glm::distance(tiles[i].transform.position(), pos) < 0.5f) {
+            matchingTiles.push_back(&tiles[i]);
+        }
+    }
+    return matchingTiles;
 }
 
 
