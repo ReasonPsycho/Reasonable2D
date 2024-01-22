@@ -20,13 +20,14 @@ public:
     glm::vec2 closestGoal(glm::vec2 currentPos);
     Shader *shader;
     std::map<std::string, std::shared_ptr<Texture>> textureMap;
+    rapidjson::Document document;
+    std::string path;
+    
     std::vector<Tile> tiles;
     std::vector<ICollision> collisions;
     std::vector<ICollision> goals;
-    rapidjson::Document document;
     void render();
     GLuint VAO{}, EBO{}, VBO{};
-    std::string path;
 };
 
 

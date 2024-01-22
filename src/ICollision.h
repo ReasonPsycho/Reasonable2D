@@ -32,11 +32,11 @@ public:
     const glm::vec4 getRelativeReactPoints();
     const glm::vec4 getReactPoints();
     bool isKinematic; //Not affected by stuff
+    int uniqueID;      // Instance variable to store the unique ID for each object
 private:
     glm::vec4 reactPoints;
     glm::vec2  meanSeparationVector = glm::vec2(0);
     static int nextID; // Static variable to keep track of the next available ID
-    int uniqueID;      // Instance variable to store the unique ID for each object
     glm::vec2 SquareSeparationVector(ICollision object);
     glm::vec2 CircleSeparationVector(const ICollision &object);
 };

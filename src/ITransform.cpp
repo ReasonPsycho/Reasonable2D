@@ -11,6 +11,8 @@
 #include "glm/geometric.hpp"
 #include "glm/trigonometric.hpp"
 #include "glm/gtx/vector_angle.hpp"
+#include "imgui.h"
+#include "glm/gtc/type_ptr.hpp"
 
 void ITransform::moveByMousePos(glm::vec2 mousePosition) {
     auto diffrenceInX =  mousePosition[0] / 2 - transform.position.x ;
@@ -50,6 +52,12 @@ float ITransform::rotateTowardsPosition2D(const glm::vec2& targetPosition) {
     
     // Return the new rotation angle 
     return transform.rotation + angleToTarget;
+}
+
+void ITransform::imgui_render() {
+    ImGui::InputFloat2("Position",glm::value_ptr(transform.position));
+    ImGui::InputFloat("Rotation",glm::value_ptr(transform.scale));
+    ImGui::InputFloat2("Scale",glm::value_ptr(transform.scale));
 }
 
 Transform::Transform(glm::vec2 vec1, float d, glm::vec2 vec2, glm::vec2 vec3) {

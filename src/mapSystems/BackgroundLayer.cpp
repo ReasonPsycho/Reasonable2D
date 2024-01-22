@@ -1,16 +1,10 @@
 //
-// Created by redkc on 03/01/2024.
+// Created by redkc on 22/01/2024.
 //
 
-#include <fstream>
-#include <iostream>
-#include "MapSystem.h"
-#include "spdlog/spdlog.h"
-#include "Tile.h"
-#include "glm/gtc/random.hpp"
+#include "BackgroundLayer.h"
 
-
-void MapSystem::init() {
+void BackgroundLayer::init() {
     // Create vertex array object (VAO)
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -45,7 +39,7 @@ void MapSystem::init() {
 
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    
+
     // Step 3: Open the JSON file
     std::ifstream file(path);
 
@@ -95,46 +89,15 @@ void MapSystem::init() {
                     int y = tile["y"].GetFloat();
                     std::string texture = tile["texture"].GetString();
 
-                    tiles.push_back(*new Tile(shader, textureMap[texture].get(), VAO, Square, true,glm::vec2(x * 5,y * 5),0,glm::vec2(0),glm::vec2(5)));
-                    if (texture == "black.jpg"){
-                        collisions.push_back(tiles[i]);
-                    }
-                    if (texture == "red.jpg"){
-                        goals.push_back(tiles[i]);
-                    }
+                    objects.push_back(*new Two2Object(shader, textureMap[texture].get(), VAO,glm::vec2(x * 5,y * 5),0,glm::vec2(0),glm::vec2(5)));
                 }
             }
         }
     }
 }
 
-MapSystem::MapSystem(Shader *shader,string path) : shader(shader), path(path) {
-  
-}
-
-void MapSystem::render() {
-    for (int i = 0; i < tiles.size(); i++) {
-        tiles[i].render();
+void BackgroundLayer::render() {
+    for(int i = 0; i <objects.size();i++){
+        objects[i].render(z);
     }
-}
-
-glm::vec2 MapSystem::randomPositionAtEgedeOfTheMap() {
-    Tile tile= tiles[0]; // Should have collison lol;
-    while(tile.texture == textureMap["black.jpg"].get()){
-        tile= tiles[(int)glm::linearRand(0, (int)tiles.size())];
-    }
-    return tile.transform.position;
-}
-
-glm::vec2 MapSystem::closestGoal(glm::vec2 currentPos) {
-    float length = 1000000;
-    glm::vec2 returnPos = glm::vec2(0);
-    for(int i = 0; i < goals.size();i++){
-        float tmpLength = glm::length(goals[i].transform.position - currentPos);
-        if(length > tmpLength){
-            returnPos =goals[i].transform.position;
-            length = tmpLength;
-        }
-    }
-    return returnPos;
 }

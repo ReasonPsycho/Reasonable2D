@@ -14,6 +14,7 @@ using namespace std;
 class Texture{
 public:
     Texture(string name , string directory,string type) ;
+    void init();
     ~Texture();
     // the texture ID
     GLuint ID{}; // TODO add more than one texture on top of it
@@ -23,6 +24,7 @@ public:
 
     // constructor reads and builds the texture
     void use(GLenum GL_TEXTUREX);
+    string getPath();
 };
 
 

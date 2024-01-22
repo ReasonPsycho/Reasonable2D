@@ -30,6 +30,7 @@ public:
     void moveByMousePos(glm::vec2 mousePosition);
     void moveByInputVector(glm::vec2 mousePosition,float deltaTime);
     void translate(float deltaTime = 0.01f);
+    void imgui_render();
 };
 
 

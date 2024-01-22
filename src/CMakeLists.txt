@@ -37,11 +37,16 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} ${ASSETS_FILES}
         ITransform.h
         IRenderable.cpp
         IRenderable.h
-        MapSystem.cpp
-        MapSystem.h
-        Tile.cpp
-        Tile.h
-        Arrow.h)
+        mapSystems/MapSystem.cpp
+        mapSystems/MapSystem.h
+        mapSystems/Tile.cpp
+        mapSystems/Tile.h
+        mapSystems/BackgroundSystem.h
+        mapSystems/Two2Object.h
+        mapSystems/BackgroundLayer.cpp
+        mapSystems/BackgroundLayer.h
+        mapSystems/MapEditor.h
+        mapSystems/MapEditor.cpp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 target_compile_definitions(${PROJECT_NAME} PRIVATE LIBRARY_SUFFIX="")
@@ -58,6 +63,7 @@ target_link_libraries(${PROJECT_NAME} stb_image)
 target_link_libraries(${PROJECT_NAME} assimp)
 target_link_libraries(${PROJECT_NAME} glfw)
 target_link_libraries(${PROJECT_NAME} imgui)
+target_link_libraries(${PROJECT_NAME} imguizmo)
 target_link_libraries(${PROJECT_NAME} spdlog)
 target_link_libraries(${PROJECT_NAME} glm::glm)
 

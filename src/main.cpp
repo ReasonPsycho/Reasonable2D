@@ -14,9 +14,9 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/random.inl"
-#include "MapSystem.h"
+#include "mapSystems/MapSystem.h"
 #include "glad/glad.h"
-#include "Arrow.h"
+#include "mapSystems/MapEditor.h"
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 
@@ -90,8 +90,6 @@ constexpr int32_t GL_VERSION_MINOR = 6;
 
 //Not my things but I could probably change them
 
-bool show_demo_window = false;
-bool show_another_window = false;
 ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 #pragma endregion Orginal set up
@@ -104,26 +102,15 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = 0;
 float lastY = 0;
 glm::vec2 keyMove = glm::vec2(0);
-glm::vec2 keyMove2 = glm::vec2(0);
 
 Shader ourShader("res/shaders/basic.vert", "res/shaders/basic.frag");
-Texture* arrowTexture;
-const int mapSystemCount = 3; // number of MapSystem objects
-MapSystem mapSystems[mapSystemCount] = {
-        MapSystem(&ourShader,"res/levels/level1.json"),
-        MapSystem(&ourShader,"res/levels/level2.json"),
-        MapSystem(&ourShader,"res/levels/level3.json")
-};
+
+const int mapSystemCount = 1; // number of MapSystem objects
+MapEditor mapEditor(&ourShader, "res/levels/level1.json");
 
 int playerMap = 0;
-int player2Map = 0;
-bool playerWon = false;
-bool player2Won = false;
-
 Squere *squere;
 Circlee *circle;
-Arrow *firstPlayerArrow;
-Arrow *secondPlayerArrow;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -155,7 +142,7 @@ int main(int, char **) {
     glDepthFunc(GL_LESS);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
+
 #pragma endregion Init
 
     // Main loop
@@ -237,17 +224,10 @@ void init_textures_vertices() {
     ourShader.init();
     ourShader.use();
     ourShader.setInt("ourTexture", 0);
-    arrowTexture = new Texture( "Arrow.png","C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\textures"," ");
-    mapSystems[0].init();
-    mapSystems[1].init();
-    mapSystems[2].init();
+    mapEditor.init();
 
-    squere = new Squere(&ourShader,   mapSystems[0].textureMap["black.jpg"].get(), Square, false,
-                        mapSystems[0].randomPositionAtEgedeOfTheMap(), 0, glm::vec2(0), glm::vec2(2));
-    circle = new Circlee(&ourShader,   mapSystems[0].textureMap["black.jpg"].get(), Circle, false,
-                         mapSystems[0].randomPositionAtEgedeOfTheMap(), 0, glm::vec2(0), glm::vec2(2));
-    firstPlayerArrow = new Arrow(&ourShader,arrowTexture,mapSystems[0].VBO, Square, false,glm::vec2(0),0, glm::vec2(0), glm::vec2(2,2));
-    secondPlayerArrow = new Arrow(&ourShader,arrowTexture,mapSystems[0].VBO, Square, false,glm::vec2(0),0, glm::vec2(0), glm::vec2(2,2));
+    squere = new Squere(&ourShader, mapEditor.textureMap["black.jpg"].get(), Square, false,
+                        glm::vec2(0), 0, glm::vec2(0), glm::vec2(2));
 }
 
 void init_imgui() {
@@ -275,8 +255,7 @@ void before_frame() {
 };
 
 void input() {
-    keyMove = glm::vec2(0);
-    keyMove2 = glm::vec2(0);
+    keyMove = glm::vec2(0);;
     processInput(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
@@ -284,40 +263,8 @@ void input() {
 }
 
 void update() {
-    squere->moveByInputVector(keyMove,deltaTime);
-    circle->moveByInputVector(keyMove2,deltaTime);
-    firstPlayerArrow->transform.position = squere->transform.position;
-    secondPlayerArrow->transform.position = circle->transform.position;
-    firstPlayerArrow->transform.rotation = firstPlayerArrow->rotateTowardsPosition2D(mapSystems[playerMap].closestGoal(firstPlayerArrow->transform.position));
-    secondPlayerArrow->transform.rotation = secondPlayerArrow->rotateTowardsPosition2D(mapSystems[player2Map].closestGoal(secondPlayerArrow->transform.position));
-    
-    
-    squere->detectCollisions(  mapSystems[playerMap].collisions);
-    squere->seperateObject();
-    circle->detectCollisions(  mapSystems[player2Map].collisions);
-    circle->seperateObject();
-
-    if(squere->detectCollisions(  mapSystems[playerMap].goals)){
-        spdlog::info("ReachedGoal!");
-        if(playerMap < 2){
-            playerMap++;
-            squere->transform.position = mapSystems[playerMap].randomPositionAtEgedeOfTheMap();
-            
-        }else{
-            playerWon = true;
-        }
-
-    }
-    if(circle->detectCollisions(  mapSystems[player2Map].goals)){
-        spdlog::info("ReachedGoal!");
-        if(player2Map < 2){
-            player2Map++;
-            circle->transform.position = mapSystems[player2Map].randomPositionAtEgedeOfTheMap();
-        }else{
-            player2Won = true;
-        }
-
-    }
+    squere->moveByInputVector(keyMove, deltaTime);
+    mapEditor.save("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\saved.json");
 }
 
 void render() {
@@ -325,28 +272,13 @@ void render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-    camera.SetUpSplitGlViewport(1,display_w,display_h);
+    camera.SetUpSingleGlViewport(display_w, display_h);
 
-    camera.Position = glm::vec3 (squere->transform.position,0);
+    camera.Position = glm::vec3(squere->transform.position, 0);
     camera.UpdateShader(&ourShader);
 
-    firstPlayerArrow->render();
-   squere->render();
-    if(playerMap == player2Map)
-        circle->render();
-    mapSystems[playerMap].render();
-    
-    camera.SetUpSplitGlViewport(0,display_w,display_h);
-
-    camera.Position = glm::vec3 (circle->transform.position,0);
-    camera.UpdateShader(&ourShader);
-
-    secondPlayerArrow->render();
-    if(playerMap == player2Map)
-        squere->render();
-    circle->render();
-    mapSystems[player2Map].render();
-    
+    squere->render();
+    mapEditor.render();
 }
 
 void imgui_begin() {
@@ -357,30 +289,7 @@ void imgui_begin() {
 }
 
 void imgui_render() {
-    /// Add new ImGui controls here
-    // Show the big demo window
-    ImGui::Begin("Score:");
-    std::ostringstream playerFirstStr;
-    playerFirstStr << "First player is on level nr: " << playerMap + 1;
-    std::string playerFirstStrg = playerFirstStr.str();
-    std::ostringstream playerSecondStr;
-    playerSecondStr <<"Second player is on level nr: " << player2Map + 1;
-    std::string playerSecondStrg = playerSecondStr.str();
-    ImGui::Text(playerFirstStrg.c_str());
-    ImGui::Text(playerSecondStrg.c_str());
-    //  ImGui::Checkbox("Does balls and walls collide?", &wallsCollide);
-    ImGui::End();
-
-    if(playerWon || player2Won){
-        int window_w = 800; // Width of the window
-        int window_h = 600; // Height of the window
-        ImGui::SetNextWindowSize(ImVec2(window_w, window_h)); // Set the window size
-        ImGui::SetNextWindowPos(ImVec2((display_w - window_w)*0.5f, (display_h - window_h)*0.5f)); // Center the window
-        ImGui::Begin("Vitory!!!");
-        ImGui::GetFont()->Scale = 5.0f;
-        ImGui::Text(playerWon ? "First player won!" : "Second player won!");
-        ImGui::End();
-    }
+    mapEditor.imgui_render();
 }
 
 void imgui_end() {
@@ -408,7 +317,7 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
         camera.ProcessKeyboard(DOWNWARD, deltaTime);
 */
-    
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         keyMove.y += 1;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -417,16 +326,6 @@ void processInput(GLFWwindow *window) {
         keyMove.x -= 1;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         keyMove.x += 1;
-
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        keyMove2.y += 1;
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        keyMove2.y -= 1;
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        keyMove2.x -= 1;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        keyMove2.x += 1;
- 
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -444,13 +343,15 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
-    
+
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
 
     lastX = xpos;
     lastY = ypos;
     
+    ImGuiIO& io = ImGui::GetIO();
+    io.MousePos = ImVec2(xpos, ypos);
     // camera.ProcessMouseMovement(xoffset, yoffset, true,deltaTime);
 }
 
@@ -472,7 +373,7 @@ void end_frame() {
 
 void init_camera() {
     glfwGetFramebufferSize(window, &display_w, &display_h);
-    camera.SetUpSingleGlViewport(display_w,display_h);
+    camera.SetUpSingleGlViewport(display_w, display_h);
     lastX = display_w / 2.0f;
     lastY = display_h / 2.0f;
 
