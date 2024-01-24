@@ -48,65 +48,7 @@ void MapSystem::init() {
     glEnableVertexAttribArray(1);
     
     // Step 3: Open the JSON file
-    std::ifstream file(path);
-
-    if (!file.is_open()) {
-        std::cout << "Failed to open JSON file." << std::endl;
-        return;
-    }
-
-    // Step 4: Read the contents of the JSON file
-    std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-    // Step 5: Close the JSON file
-    file.close();
-
-    // Step 6: Parse the JSON data
-    if (document.Parse(jsonContent.c_str()).HasParseError()) {
-        std::cout << "Failed to parse JSON." << std::endl;
-        return;
-    }
-    spdlog::info("parsedDocument");
-
-
-    // Step 7: Extract and use the required information from the parsed JSON data
-    const rapidjson::Value &loadedTextures = document["textures"];
-    if (loadedTextures.IsArray()) {
-        for (rapidjson::SizeType i = 0; i < loadedTextures.Size(); i++) {
-            const rapidjson::Value &texture = loadedTextures[i];
-            if (texture.IsObject()) {
-                if (texture.HasMember("path") && texture.HasMember("name")) {
-                    std::string path = texture["path"].GetString();
-                    std::string name = texture["name"].GetString();
-                    std::shared_ptr<Texture> tmpTexture = std::make_shared<Texture>(name,path, "IDK");
-                    textureMap[name] = tmpTexture;
-                }
-            }
-        }
-    }
-
-    const rapidjson::Value &loadedTiles = document["tiles"];
-    if (loadedTiles.IsArray()) {
-        for (rapidjson::SizeType i = 0; i < loadedTiles.Size(); i++) {
-            const rapidjson::Value &tile = loadedTiles[i];
-            if (tile.IsObject()) {
-
-                if (tile.HasMember("x") && tile.HasMember("y") && tile.HasMember("texture")) {
-                    int x = tile["x"].GetFloat();
-                    int y = tile["y"].GetFloat();
-                    std::string texture = tile["texture"].GetString();
-
-                    tiles.push_back(*new Tile(shader, textureMap[texture].get(), VAO, Square, true,glm::vec2(x * 5,y * 5),0,glm::vec2(0),glm::vec2(5)));
-                    if (texture == "black.jpg"){
-                        collisions.push_back(tiles[i]);
-                    }
-                    if (texture == "red.jpg"){
-                        goals.push_back(tiles[i]);
-                    }
-                }
-            }
-        }
-    }
+    load(path);
 }
 
 MapSystem::MapSystem(Shader *shader,string path) : shader(shader), path(path) {
@@ -138,4 +80,75 @@ glm::vec2 MapSystem::closestGoal(glm::vec2 currentPos) {
         }
     }
     return returnPos;
+}
+
+void MapSystem::load(string path) {
+    textureMap.clear();
+    tiles.clear();
+    // Step 3: Open the JSON file
+    std::ifstream file(path);
+
+    if (!file.is_open()) {
+        std::cout << "Failed to open JSON file." << std::endl;
+        return;
+    }
+
+    // Step 4: Read the contents of the JSON file
+    std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+    // Step 5: Close the JSON file
+    file.close();
+
+    // Step 6: Parse the JSON data
+    if (document.Parse(jsonContent.c_str()).HasParseError()) {
+        std::cout << "Failed to parse JSON." << std::endl;
+        return;
+    }
+    spdlog::info("parsedDocument");
+
+
+    // Step 7: Extract and use the required information from the parsed JSON data
+    const rapidjson::Value &loadedTextures = document["textures"];
+    if (loadedTextures.IsArray()) {
+        for (rapidjson::SizeType i = 0; i < loadedTextures.Size(); i++) {
+            const rapidjson::Value &texture = loadedTextures[i];
+            if (texture.IsObject()) {
+                if (texture.HasMember("path") && texture.HasMember("name")) {
+                    std::string path = texture["path"].GetString();
+                    std::string name = texture["name"].GetString();
+                    std::shared_ptr<Texture> tmpTexture = std::make_shared<Texture>(name, path, "IDK");
+                    textureMap[name] = tmpTexture;
+                }
+            }
+        }
+    }
+
+    const rapidjson::Value &loadedTiles = document["tiles"];
+    if (loadedTiles.IsArray()) {
+        for (rapidjson::SizeType i = 0; i < loadedTiles.Size(); i++) {
+            const rapidjson::Value &tile = loadedTiles[i];
+            if (tile.IsObject()) {
+
+                if (tile.HasMember("x") && tile.HasMember("y") && tile.HasMember("texture")) {
+                    int x = tile["x"].GetFloat();
+                    int y = tile["y"].GetFloat();
+                    float rotation = 0;
+                    if (tile.HasMember("rotation")) {
+                        rotation = tile["rotation"].GetFloat();
+                    }
+                    glm::vec2 scale = glm::vec2(1);
+                    if (tile.HasMember("scale")) {
+                        scale = glm::vec2(tile["scale"]["x"].GetFloat(), tile["scale"]["y"].GetFloat());
+                    }
+                    std::string texture = tile["texture"].GetString();
+
+                    tiles.push_back(
+                            *new Tile(shader, textureMap[texture].get(), VAO, Square, true, glm::vec2(x, y), rotation,
+                                      scale, glm::vec2(0)));
+
+                    collisions.push_back(tiles[i]);
+                }
+            }
+        }
+    }
 }

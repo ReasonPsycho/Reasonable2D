@@ -109,6 +109,7 @@ Shader ourShader("res/shaders/basic.vert", "res/shaders/basic.frag");
 const int mapSystemCount = 1; // number of MapSystem objects
 MapEditor mapEditor(&ourShader, "res/levels/level1.json");
 BackgroundSystem backgroundSystem(&ourShader);
+MapSystem mapSystem(&ourShader,"res/levels/map.json");
 int playerMap = 0;
 Squere *squere;
 Texture *texture;
@@ -234,11 +235,12 @@ void init_textures_vertices() {
     mapEditor.init();
     texture = new Texture("conept.png","C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\textures\\BarrelShooter","");
     squere = new Squere(&ourShader, texture, Square, false,
-                        glm::vec2(0), 0, glm::vec2(0), glm::vec2(2));
+                        glm::vec2(0,7), 0, glm::vec2(0), glm::vec2(2));
     backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\firstLayer.json",-60,glm::vec3(1,1,1));
-    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\secondLayer.json",-80,glm::vec3(0.9f,0.9f,0.9f));
-    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\thirdLayer.json",-100,glm::vec3(1,1,1));
+    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\secondLayer.json",-80,glm::vec3(0.8f,0.8f,0.8f));
+    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\thirdLayer.json",-100,glm::vec3(0.9f,0.9f,0.9f));
    // backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\zeroLayer.json",-90,glm::vec3(1,1,1));
+    mapSystem.init();
 }
 
 void init_imgui() {
@@ -275,6 +277,9 @@ void input() {
 
 void update() {
     squere->moveByInputVector(keyMove, deltaTime);
+    squere->detectCollisions(mapSystem.collisions);
+    squere->seperateObject();
+    squere->translate(deltaTime);
 }
 
 void render() {
@@ -289,6 +294,8 @@ void render() {
     camera.UpdateShader(&ourShader);
 
     backgroundSystem.render();
+    
+    mapSystem.render();
     
     squere->render();
     mapEditor.render();

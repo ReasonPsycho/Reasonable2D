@@ -5,7 +5,7 @@
 #include "Squere.h"
 #include "Utilities/Shader.h"
 #include "Utilities/Texture.h"
-Squere::Squere(Shader *shader, Texture *texture, CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 position, float rotation, glm::vec2 vel, glm::vec2 scale) : IRenderable(
+Squere::Squere(Shader *shader, Texture *texture, CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 position, float rotation,  glm::vec2 scale,glm::vec2 vel) : IRenderable(
         shader, texture), ICollision(collsionType, isKinematic,scale), ITransform(position,rotation,vel,scale) {
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);

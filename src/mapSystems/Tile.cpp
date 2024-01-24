@@ -4,8 +4,8 @@
 
 #include "Tile.h"
 
-Tile::Tile(Shader *shader, Texture *texture, GLuint vao, CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 position, float rotation, glm::vec2 vel, glm::vec2 scale) : IRenderable(
-        shader, texture, vao), ICollision(collsionType, isKinematic,scale), ITransform(position,rotation,vel,scale) {
+Tile::Tile(Shader *shader, Texture *texture, GLuint vao, CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 position, float rotation, glm::vec2 scale, glm::vec2 vel) : IRenderable(
+        shader, texture, vao), ICollision(collsionType, isKinematic,scale), ITransform(position,rotation,scale,vel) {
     vertexCount = 6;
 }
 

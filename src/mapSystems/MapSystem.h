@@ -27,6 +27,7 @@ public:
     std::vector<ICollision> collisions;
     std::vector<ICollision> goals;
     void render();
+    void load(string path);
     GLuint VAO{}, EBO{}, VBO{};
 };
 

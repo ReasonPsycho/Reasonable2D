@@ -18,7 +18,6 @@ void ITransform::moveByMousePos(glm::vec2 mousePosition) {
     auto diffrence =  mousePosition / 2.0f - transform.position() ;
     
     transform.setVelocity((glm::clamp(glm::vec2(-1.0f),diffrence,glm::vec2(1.0f)) * (1.0f - smooth) +  transform.velocity() * smooth) * speed);
-    translate();
 }
 
 void ITransform::translate(float deltaTime ) {
@@ -27,7 +26,6 @@ void ITransform::translate(float deltaTime ) {
 
 void ITransform::moveByInputVector(glm::vec2 inputVector,float deltaTime) {
     transform.setVelocity((inputVector * (1.0f - smooth) + transform.velocity() * smooth) * speed); 
-    translate(deltaTime);
 }
 
 ITransform::ITransform(glm::vec2 position, float rotation, glm::vec2 vel, glm::vec2 scale) : transform(position,rotation,scale){

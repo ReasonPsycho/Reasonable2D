@@ -11,7 +11,7 @@ int ICollision::nextID = 0;
 ICollision::ICollision(CollsionTypeEnum collsionType, bool isKinematic,glm::vec2 scale) : collsionType(collsionType),
                                                                           isKinematic(isKinematic) {
     if(collsionType == Square){
-        setReactPoints(glm::vec4(-scale.x/2,scale.x/2,-scale.y/2,+scale.y/2) );
+        setReactPoints(glm::vec4(-scale.x,scale.x,-scale.y,+scale.y) );
     }else{
         radius = scale.x/2;
     }
@@ -137,7 +137,13 @@ glm::vec2 ICollision::CircleSeparationVector(const ICollision &object) { // Coul
 
 void ICollision::seperateObject() {
     if (meanSeparationVector != glm:: vec2(0)){
-        this->transform.position() += meanSeparationVector;
+        this->transform.setPosition(this->transform.position() += meanSeparationVector);
+        if(glm::abs(meanSeparationVector.x) > 0){
+            this->transform.setVelocity(glm::vec2(0,this->transform.velocity().y));
+        }
+        if(glm::abs(meanSeparationVector.y) > 0){
+            this->transform.setVelocity(glm::vec2(this->transform.velocity().x,0));
+        }
     }
 }
 
