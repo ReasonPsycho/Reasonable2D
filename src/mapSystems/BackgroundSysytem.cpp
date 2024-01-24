@@ -10,12 +10,24 @@ void BackgroundSystem::init() {
 }
 
 
-void BackgroundSystem::render() {
-    for (int i = 0; i < layers.size(); i++) {
-        layers[i].render();
-    }
+void BackgroundSystem::addLayer(string path, float z, glm::vec3 color, float scroolSpeed) {
+    layers.push_back(BackgroundLayer(shader, path, z, color, scroolSpeed));
 }
 
-void BackgroundSystem::addLayer(string path, float z, glm::vec3 color) {
-    layers.push_back(BackgroundLayer(shader,path, z, color));
+void BackgroundSystem::imgui_render() {
+
+
+    ImGui::Begin("Layer editor");
+
+    if (ImGui::TreeNode("Layers")) {
+
+        if (!layers.empty()) {
+            for (auto &layer: layers) {
+                layer.imgui_render();
+            }
+        };
+        ImGui::TreePop();
+    }
+    ImGui::End();
+
 }

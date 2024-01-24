@@ -16,14 +16,12 @@
 
 class BackgroundSystem {
 public:
-    BackgroundSystem(Shader* shader) : shader(shader){ };
+    BackgroundSystem(Shader* shader) : shader(shader) { };
     void init();
-    
+    void imgui_render();
     Shader *shader;
     std::vector<BackgroundLayer> layers;
-   
-    void render();
-    void addLayer(string path,float z,glm::vec3 color);
+    void addLayer(string path,float z,glm::vec3 color,float scroolSpeed);
 };
 
 

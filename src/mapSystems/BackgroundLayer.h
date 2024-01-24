@@ -13,7 +13,7 @@
 
 class BackgroundLayer {
 public:
-    BackgroundLayer(Shader* shader,string path, float z, glm::vec3 color) :shader(shader), path(path),z(z),color(color){
+    BackgroundLayer(Shader* shader,string path, float z, glm::vec3 color,float scrollSpeed) :shader(shader), path(path),z(z),color(color),scrollSpeed(scrollSpeed){
         init();
     }
     std::map<std::string, std::shared_ptr<Texture>> textureMap;
@@ -24,8 +24,9 @@ public:
     std::vector<Tile> tiles;
     glm::vec3 color;
     float z;
-    float scroll;
-    void render();
+    float scrollSpeed;
+    void render(glm::vec2 pos);
+    void imgui_render();
     void init();
     void load(string path);
 };

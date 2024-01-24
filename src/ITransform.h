@@ -21,6 +21,7 @@ struct Transform {
               glm::vec2 scale = glm::vec2(1.0f))
             : positionVec(position), rotationVal(rotation), scaleVec(scale) ,velocityVec(vel) {
         updateMatrix();
+        accelerationVec = glm::vec2 (0,-5.0f);
     }
 
     glm::vec2 position() const {
@@ -59,6 +60,14 @@ struct Transform {
     }
 
 
+    glm::vec2 acceleration() const {
+        return accelerationVec;
+    }
+
+    void setAcceleration(const glm::vec2 &acceleration) {
+        accelerationVec = acceleration;
+    }
+
     glm::mat4x4 matrix() const {
         return matrixVal;
     }
@@ -73,8 +82,8 @@ private:
     float rotationVal;
     glm::vec2 scaleVec;
     glm::vec2 velocityVec;
+    glm::vec2 accelerationVec;
     glm::mat4x4 matrixVal;
-    
     void updateMatrix() {
         matrixVal = glm::mat4x4(1.0f);
         matrixVal = glm::translate(matrixVal, glm::vec3(positionVec, -50.0f));
@@ -99,12 +108,16 @@ public:
     glm::vec2 vel = glm::vec2(0),
     glm::vec2 scale= glm::vec2(0));
     Transform transform;
+    bool isJumping = false;
+    bool isDoubleJumping = false;
     float smooth = 0.1f;//Q: WIll this slow down this A: Yes and what
     float speed = 2.5f;
     void moveByMousePos(glm::vec2 mousePosition);
     void moveByInputVector(glm::vec2 mousePosition,float deltaTime);
     void translate(float deltaTime = 0.01f);
     void imgui_render(Camera* camera);
+    void ApplyGravity(float dt);
+    void Jump(float h,float th);
 };
 
 

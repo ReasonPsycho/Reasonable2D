@@ -60,6 +60,23 @@ void IRenderable::render(float z,glm::vec3 color) {
     glDrawArrays(GL_TRIANGLE_FAN, 0, vertexCount);
 }
 
+void IRenderable::render(glm::vec2 pos,float z, glm::vec3 color,float scroolSpeed) {
+
+    texture->use(GL_TEXTURE0);
+    shader->use();
+
+    glm::mat4 model(1.0f);
+    model = glm::translate(model, glm::vec3(transform.position() - glm::vec2 (pos.x * (scroolSpeed + 0.000001f),0) , z));
+    if(transform.rotation() != 0)
+        model = glm::rotate(model,transform.rotation(),glm::vec3 (0,0,1));
+    model = glm::scale(model, glm::vec3(transform.scale(),1.0f));
+    shader->setMatrix4("transform", false, glm::value_ptr(model));
+    shader->setVec3("lightColor",color.x,color.y,color.z);
+
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, vertexCount);
+}
+
 IRenderable::IRenderable(Shader* shader, Texture* texture,GLuint VAO): shader(shader),texture(texture),VAO(VAO) {
 
 }

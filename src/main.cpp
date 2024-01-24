@@ -103,7 +103,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = 0;
 float lastY = 0;
 glm::vec2 keyMove = glm::vec2(0);
-
+float h = 1, th = 1;
 Shader ourShader("res/shaders/basic.vert", "res/shaders/basic.frag");
 
 const int mapSystemCount = 1; // number of MapSystem objects
@@ -116,6 +116,8 @@ Texture *texture;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+bool pressedJump = false;
 
 #pragma endregion My set up
 
@@ -236,9 +238,9 @@ void init_textures_vertices() {
     texture = new Texture("conept.png","C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\textures\\BarrelShooter","");
     squere = new Squere(&ourShader, texture, Square, false,
                         glm::vec2(0,7), 0, glm::vec2(0), glm::vec2(2));
-    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\firstLayer.json",-60,glm::vec3(1,1,1));
-    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\secondLayer.json",-80,glm::vec3(0.8f,0.8f,0.8f));
-    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\thirdLayer.json",-100,glm::vec3(0.9f,0.9f,0.9f));
+    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\firstLayer.json",-60,glm::vec3(1,1,1),1.0f);
+    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\secondLayer.json",-80,glm::vec3(0.8f,0.8f,0.8f),1.0f);
+    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\thirdLayer.json",-100,glm::vec3(0.9f,0.9f,0.9f),1.0f);
    // backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\zeroLayer.json",-90,glm::vec3(1,1,1));
     mapSystem.init();
 }
@@ -277,6 +279,7 @@ void input() {
 
 void update() {
     squere->moveByInputVector(keyMove, deltaTime);
+    squere->ApplyGravity(deltaTime);
     squere->detectCollisions(mapSystem.collisions);
     squere->seperateObject();
     squere->translate(deltaTime);
@@ -293,8 +296,10 @@ void render() {
     camera.Position = glm::vec3(squere->transform.position(), 0) + glm::vec3(0,2.0f,0);
     camera.UpdateShader(&ourShader);
 
-    backgroundSystem.render();
-    
+    backgroundSystem.layers[0].render(camera.Position);
+    backgroundSystem.layers[1].render(camera.Position);
+    backgroundSystem.layers[2].render(camera.Position);
+
     mapSystem.render();
     
     squere->render();
@@ -311,6 +316,13 @@ void imgui_begin() {
 
 void imgui_render() {
     mapEditor.imgui_render(&camera);
+    backgroundSystem.imgui_render();
+
+    ImGui::Begin("Settings");
+    ImGui::InputFloat("t", &h);
+    ImGui::InputFloat("th", &th);
+
+    ImGui::End();
 }
 
 void imgui_end() {
@@ -340,9 +352,14 @@ void processInput(GLFWwindow *window) {
 */
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        keyMove.y += 1;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        keyMove.y -= 1;
+        if(!pressedJump){
+            pressedJump = true;
+            squere->Jump(h,th);
+        }
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE)
+        pressedJump = false;
+    
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         keyMove.x -= 1;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)

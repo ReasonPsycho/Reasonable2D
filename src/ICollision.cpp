@@ -142,6 +142,8 @@ void ICollision::seperateObject() {
             this->transform.setVelocity(glm::vec2(0,this->transform.velocity().y));
         }
         if(glm::abs(meanSeparationVector.y) > 0){
+            isJumping = false;
+            isDoubleJumping = false;
             this->transform.setVelocity(glm::vec2(this->transform.velocity().x,0));
         }
     }

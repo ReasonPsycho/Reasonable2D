@@ -12,7 +12,6 @@ Tile::Tile(Shader *shader, Texture *texture, GLuint vao, CollsionTypeEnum collsi
 void Tile::imgui_render(std::map<std::string, std::shared_ptr<Texture>> textureMap,Camera* camera) {
     ImGui::PushID(uniqueID);
     string  name  = "Tile nr:" + std::to_string(uniqueID);
-
     // TreeNode takes the current state 'isTreeOpen' as a parameter
     if (ImGui::TreeNodeEx(name.c_str(), isNodeOpen ? ImGuiTreeNodeFlags_DefaultOpen : 0)) {
         ITransform::imgui_render(camera);

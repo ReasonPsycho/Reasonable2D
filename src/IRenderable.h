@@ -36,6 +36,7 @@ public:
     void render();
     void render(float z);
     void render(float z,glm::vec3 color) ;
+    void render(glm::vec2 pos,float z, glm::vec3 color,float scroolSpeed) ;
     void imgui_render();
     void imgui_select_new_texture(std::map<std::string, std::shared_ptr<Texture>> textureMap);
 };

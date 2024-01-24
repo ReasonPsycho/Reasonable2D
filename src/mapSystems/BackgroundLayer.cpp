@@ -112,8 +112,20 @@ void BackgroundLayer::load(string path) {
     }
 }
 
-void BackgroundLayer::render() {
+void BackgroundLayer::render(glm::vec2 pos) {
     for(int i = 0; i <tiles.size();i++){
-        tiles[i].render(z,color);
+        tiles[i].render(pos,z,color,scrollSpeed);
     }
+}
+
+void BackgroundLayer::imgui_render() {
+    ImGui::PushID(path.c_str());
+    string  name  = "Layer path:" + path;
+
+    // TreeNode takes the current state 'isTreeOpen' as a parameter
+    if (ImGui::TreeNode(name.c_str())) {
+        ImGui::InputFloat("ScrollSpeed", &scrollSpeed);
+        ImGui::TreePop();
+    }
+    ImGui::PopID();
 }
