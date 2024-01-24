@@ -16,15 +16,14 @@
 
 class BackgroundSystem {
 public:
-    BackgroundSystem(Shader* shader,string path);
+    BackgroundSystem(Shader* shader) : shader(shader){ };
     void init();
     
     Shader *shader;
-    std::map<std::string, std::shared_ptr<Texture>> textureMap;
-   
     std::vector<BackgroundLayer> layers;
    
     void render();
+    void addLayer(string path,float z,glm::vec3 color);
 };
 
 

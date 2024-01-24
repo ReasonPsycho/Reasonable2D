@@ -17,6 +17,7 @@
 #include "mapSystems/MapSystem.h"
 #include "glad/glad.h"
 #include "mapSystems/MapEditor.h"
+#include "mapSystems/BackgroundSystem.h"
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 
@@ -90,7 +91,7 @@ constexpr int32_t GL_VERSION_MINOR = 6;
 
 //Not my things but I could probably change them
 
-ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+ImVec4 clear_color = ImVec4(43.0f/255.0f, 205.0f/255.0f, 225.0f/255.0f, 1.0f);
 
 #pragma endregion Orginal set up
 
@@ -107,10 +108,10 @@ Shader ourShader("res/shaders/basic.vert", "res/shaders/basic.frag");
 
 const int mapSystemCount = 1; // number of MapSystem objects
 MapEditor mapEditor(&ourShader, "res/levels/level1.json");
-
+BackgroundSystem backgroundSystem(&ourShader);
 int playerMap = 0;
 Squere *squere;
-Circlee *circle;
+Texture *texture;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -217,6 +218,9 @@ bool init() {
         spdlog::error("Failed to initialize OpenGL loader!");
         return false;
     }
+
+    stbi_set_flip_vertically_on_load(true);
+
     return true;
 }
 
@@ -228,9 +232,13 @@ void init_textures_vertices() {
     ourShader.use();
     ourShader.setInt("ourTexture", 0);
     mapEditor.init();
-
-    squere = new Squere(&ourShader, mapEditor.textureMap["black.jpg"].get(), Square, false,
+    texture = new Texture("conept.png","C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\textures\\BarrelShooter","");
+    squere = new Squere(&ourShader, texture, Square, false,
                         glm::vec2(0), 0, glm::vec2(0), glm::vec2(2));
+    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\firstLayer.json",-60,glm::vec3(1,1,1));
+    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\secondLayer.json",-80,glm::vec3(0.9f,0.9f,0.9f));
+    backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\thirdLayer.json",-100,glm::vec3(1,1,1));
+   // backgroundSystem.addLayer("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\zeroLayer.json",-90,glm::vec3(1,1,1));
 }
 
 void init_imgui() {
@@ -267,7 +275,6 @@ void input() {
 
 void update() {
     squere->moveByInputVector(keyMove, deltaTime);
-    mapEditor.save("C:\\Users\\redkc\\CLionProjects\\assignment-x-the-project-ReasonPsycho\\res\\levels\\saved.json");
 }
 
 void render() {
@@ -277,9 +284,12 @@ void render() {
 
     camera.SetUpSingleGlViewport(display_w, display_h);
 
-    camera.Position = glm::vec3(squere->transform.position(), 0);
+    
+    camera.Position = glm::vec3(squere->transform.position(), 0) + glm::vec3(0,2.0f,0);
     camera.UpdateShader(&ourShader);
 
+    backgroundSystem.render();
+    
     squere->render();
     mapEditor.render();
 }

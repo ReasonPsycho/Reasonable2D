@@ -40,9 +40,10 @@ void ITransform::imgui_render(Camera* camera) {
     if (ImGui::InputFloat2("Position", glm::value_ptr(temp_position))) {
         transform.setPosition(temp_position);
     }
-    
-    float temp_rotation = transform.rotation();
+
+    float temp_rotation = glm::degrees(transform.rotation());
     if (ImGui::InputFloat("Rotation", &temp_rotation)) {
+        temp_rotation = glm::radians(temp_rotation); // Convert degrees to radians
         transform.setRotation(temp_rotation);
     }
 
@@ -50,16 +51,4 @@ void ITransform::imgui_render(Camera* camera) {
     if (ImGui::InputFloat2("Scale", glm::value_ptr(temp_scale))) {
         transform.setScale(temp_scale);
     }
-
-    static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
-    static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
-
-    glm::mat4x4 temp_matrix = transform.matrix();
-
-    ImGuiIO &io = ImGui::GetIO();
-    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-    ImGuizmo::Manipulate(glm::value_ptr(camera->GetViewMatrix()), glm::value_ptr(camera->GetProjectionMatrix()),
-                         mCurrentGizmoOperation, mCurrentGizmoMode,  glm::value_ptr(temp_matrix),
-                         nullptr, nullptr);
-    transform.setMatrix(temp_matrix);
 }

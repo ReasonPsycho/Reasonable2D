@@ -46,9 +46,6 @@ void MapEditor::init() {
 
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
-    load();
-
 }
 
 MapEditor::MapEditor(Shader *shader, string path) : shader(shader), path(path), buffer(100), nameBuffer(100),
@@ -91,9 +88,20 @@ void MapEditor::save(string savePath) {
         writer.Double(tile.transform.position().x);  // Assuming the Tile class has getX() method
         writer.Key("y");
         writer.Double(tile.transform.position().y);  // Assuming the Tile class has getY() method
+        writer.Key("rotation");
+        writer.Double(tile.transform.rotation());  // Assuming the Tile class has rotation() method
+        writer.Key("scale");
+        writer.StartObject();
+        writer.Key("x");
+        writer.Double(tile.transform.scale().x);  // Assuming the Tile class has scale() method
+        writer.Key("y");
+        writer.Double(tile.transform.scale().y);
+        writer.EndObject();
+
         writer.Key("texture");
         writer.String(tile.texture->name.c_str());  // Assuming the Tile class has getTextureName() method
         writer.EndObject();
+
     }
     writer.EndArray();
 
@@ -110,7 +118,12 @@ void MapEditor::save(string savePath) {
     outFile.close();
 }
 
-void MapEditor::load() {
+void MapEditor::createNew() {
+    textureMap.clear();
+    tiles.clear();
+}
+
+void MapEditor::load(string path) {
     textureMap.clear();
     tiles.clear();
     // Step 3: Open the JSON file
@@ -160,10 +173,19 @@ void MapEditor::load() {
                 if (tile.HasMember("x") && tile.HasMember("y") && tile.HasMember("texture")) {
                     int x = tile["x"].GetFloat();
                     int y = tile["y"].GetFloat();
+                    float rotation = 0;
+                    if (tile.HasMember("rotation")) {
+                        rotation = tile["rotation"].GetFloat();
+                    }
+                    glm::vec2 scale = glm::vec2(1);
+                    if (tile.HasMember("scale")) {
+                        scale = glm::vec2(tile["scale"]["x"].GetFloat(), tile["scale"]["y"].GetFloat());
+                    }
                     std::string texture = tile["texture"].GetString();
 
-                    tiles.push_back(*new Tile(shader, textureMap[texture].get(), VAO, Square, true, glm::vec2(x, y), 0,
-                                              glm::vec2(0), glm::vec2(1)));
+                    tiles.push_back(
+                            *new Tile(shader, textureMap[texture].get(), VAO, Square, true, glm::vec2(x, y), rotation,
+                                      scale, glm::vec2(0)));
                 }
             }
         }
@@ -172,31 +194,98 @@ void MapEditor::load() {
 
 
 void MapEditor::imgui_render(Camera *camera) {
-    if (ImGui::IsMouseClicked(1) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
-        ImVec2 pos = ImGui::GetMousePos();
-        std::vector<Tile *> matchingTiles = checkForTiles(camera->ScreenToWorld(glm::vec3(pos.x, pos.y, -50.0f)));
+    //Clicks
 
-        if (!matchingTiles.empty()) {
-            for (int i = 0; i < tiles.size(); ++i) {
-                tiles[i].isNodeOpen = false;
-            }
+    if (ImGui::IsMouseClicked(1)) {
+        openTiles.clear();
+        min = ImGui::GetMousePos();
+        isSelecting = true;
+    }
+
+    if (ImGui::IsMouseDragging(1) && isSelecting) {
+
+    }
+
+    if (ImGui::IsMouseReleased(1) && isSelecting) {
+        isSelecting = false;
+        max = ImGui::GetMousePos();
+
+        for (auto &tile: tiles) {
+            tile.isNodeOpen = false;
         }
-        for (int i = 0; i < matchingTiles.size(); ++i) {
-            matchingTiles[i]->isNodeOpen = true;
+
+        glm::vec3 minPos = camera->ScreenToWorld(glm::vec3(min.x, min.y, -50.0f));
+        glm::vec3 maxPos = camera->ScreenToWorld(glm::vec3(max.x, max.y, 50.0f));
+
+        std::vector<Tile *> matchingTiles = queryForTilesWithinArea(minPos, maxPos);
+
+        for (auto *tile: matchingTiles) {
+            tile->isNodeOpen = true;
+            openTiles.push_back(tile);
         }
     }
+
+    if (ImGui::IsMouseClicked(2) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
+        ImVec2 pos = ImGui::GetMousePos();
+        glm::vec2 worldPos = camera->ScreenToWorld(glm::vec3(pos.x, pos.y, -50.0f));
+        tiles.emplace_back(shader, textureMap[textureMap.begin()->first].get(), VAO, Square, true,
+                           glm::vec2(worldPos.x, worldPos.y), 0,
+                           glm::vec2(1), glm::vec2(0));
+    }
+
+
+    //Delere
+    if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
+        for (int i = 0; i < tiles.size(); ++i) {
+            if (tiles[i].isNodeOpen) {
+                tiles.erase(tiles.begin() + i);
+                i--;
+            }
+        }
+    }
+
+
+    if (!openTiles.empty()) {
+        static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
+        static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+
+        combinedMatrix = glm::mat4x4(0);
+        for (int i = 0; i < openTiles.size(); ++i) {
+            combinedMatrix += openTiles[i]->transform.matrix();
+        }
+        combinedMatrix /= openTiles.size();
+
+        ImGuiIO &io = ImGui::GetIO();
+        glm::vec3 snap = glm::vec3(1.0f);
+        glm::mat4x4 diff_matrix;
+
+        ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+        ImGuizmo::Manipulate(glm::value_ptr(camera->GetViewMatrix()), glm::value_ptr(camera->GetProjectionMatrix()),
+                             mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(combinedMatrix),
+                             glm::value_ptr(diff_matrix), &snap.x);
+
+        for (int i = 0; i < openTiles.size(); ++i) {
+            openTiles[i]->transform.setPosition(openTiles[i]->transform.position() + glm::vec2(diff_matrix[3]));
+        }
+    }
+
+
     ImGui::Begin("Map editor");
     std::copy(path.begin(), path.end(), buffer.begin());
     buffer[path.size()] = '\0';
     ImGui::InputText("Level path", buffer.data(), buffer.size());
     path = std::string(buffer.data());
 
+    if (ImGui::Button("Create new")) {
+        createNew();
+    }
+
     if (ImGui::Button("Save")) {
         save(path);
     }
 
     if (ImGui::Button("Load")) {
-        load();
+        load(path);
     }
 
     if (ImGui::TreeNode("Textures")) {
@@ -213,13 +302,36 @@ void MapEditor::imgui_render(Camera *camera) {
 
         ImGui::TreePop();
     }
-    if (ImGui::TreeNode("Tiles")) {
-        for (auto &tile: tiles) {
-            tile.imgui_render(textureMap, camera);
-        }
-        ImGui::TreePop();
-    };
+    if(!tiles.empty()){
+        if (ImGui::TreeNode("Tiles")) {
+            for (auto &tile: tiles) {
+                tile.imgui_render(textureMap, camera);
+            }
+            ImGui::TreePop();
+        }; 
+    }
 
+
+    //Ctrl + c
+    if (ImGui::IsKeyPressed(ImGuiKey_V)) {
+        if (!openTiles.empty()) {
+            std::vector<Tile> tilesToInsert;
+            for (const auto &tile: openTiles) {
+                tilesToInsert.emplace_back(tile->shader, tile->texture, tile->VAO,
+                                           tile->collsionType,
+                                           tile->isKinematic, tile->transform.position(),
+                                           tile->transform.rotation(),tile->transform.scale(), tile->transform.velocity());
+            }
+            tiles.insert(tiles.end(),tilesToInsert.begin(),tilesToInsert.end());
+            openTiles.clear();
+            for (int i = 0; i < tiles.size(); ++i) {
+                if (tiles[i].isNodeOpen) {
+                    openTiles.push_back(&tiles[i]);
+                }
+            }
+        }
+    }
+    
     ImGui::End();
 }
 
@@ -228,6 +340,31 @@ std::vector<Tile *> MapEditor::checkForTiles(glm::vec2 pos) {
     for (int i = 0; i < tiles.size(); i++) {
 
         if (glm::distance(tiles[i].transform.position(), pos) < 0.5f) {
+            matchingTiles.push_back(&tiles[i]);
+        }
+    }
+    return matchingTiles;
+}
+
+std::vector<Tile *> MapEditor::queryForTilesWithinArea(glm::vec3 vec1, glm::vec3 vec2) {
+    std::vector<Tile *> matchingTiles;
+    if (vec2.x < vec1.x) {
+        float tmp = vec1.x;
+        vec1.x = vec2.x;
+        vec2.x = tmp;
+    }
+
+    if (vec2.y < vec1.y) {
+        float tmp = vec1.y;
+        vec1.y = vec2.y;
+        vec2.y = tmp;
+    }
+    vec1 -= glm::vec3(0.5f);
+    vec2 += glm::vec3(0.5f);
+
+    for (int i = 0; i < tiles.size(); i++) {
+        if (tiles[i].transform.position().x > vec1.x && tiles[i].transform.position().y > vec1.y &&
+            tiles[i].transform.position().x < vec2.x && tiles[i].transform.position().y < vec2.y) {
             matchingTiles.push_back(&tiles[i]);
         }
     }

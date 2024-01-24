@@ -17,10 +17,10 @@ void IRenderable::render() {
     glm::mat4 model(1.0f);
     model = glm::translate(model, glm::vec3(transform.position(), -50));
     if(transform.rotation() != 0) 
-        model = glm::rotate(model,transform.rotation() + 1.7f,glm::vec3 (0,0,1));
+        model = glm::rotate(model,transform.rotation(),glm::vec3 (0,0,1));
     model = glm::scale(model, glm::vec3(transform.scale(),1.0f));
     shader->setMatrix4("transform", false, glm::value_ptr(model));
-    shader->setVec3("lightColor",255.0f, 255.0f, 255.0f);
+    shader->setVec3("lightColor",1.0f, 1.0f, 1.0f);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, vertexCount);
@@ -34,10 +34,27 @@ void IRenderable::render(float z) {
     glm::mat4 model(1.0f);
     model = glm::translate(model, glm::vec3(transform.position(), z));
     if(transform.rotation() != 0)
-        model = glm::rotate(model,transform.rotation() + 1.7f,glm::vec3 (0,0,1));
+        model = glm::rotate(model,transform.rotation(),glm::vec3 (0,0,1));
     model = glm::scale(model, glm::vec3(transform.scale(),1.0f));
     shader->setMatrix4("transform", false, glm::value_ptr(model));
-    shader->setVec3("lightColor",255.0f, 255.0f, 255.0f);
+    shader->setVec3("lightColor",1.0f, 1.0f, 1.0f);
+
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, vertexCount);
+}
+
+void IRenderable::render(float z,glm::vec3 color) {
+
+    texture->use(GL_TEXTURE0);
+    shader->use();
+
+    glm::mat4 model(1.0f);
+    model = glm::translate(model, glm::vec3(transform.position(), z));
+    if(transform.rotation() != 0)
+        model = glm::rotate(model,transform.rotation(),glm::vec3 (0,0,1));
+    model = glm::scale(model, glm::vec3(transform.scale(),1.0f));
+    shader->setMatrix4("transform", false, glm::value_ptr(model));
+    shader->setVec3("lightColor",color.x,color.y,color.z);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, vertexCount);

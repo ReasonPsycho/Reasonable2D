@@ -17,9 +17,9 @@
 
 struct Transform {
     
-    Transform(glm::vec2 position = glm::vec2(0.0f), float rotation = 0,
+    Transform(glm::vec2 position = glm::vec2(0.0f), float rotation = 0,glm::vec2 vel = glm::vec2(0.0f),
               glm::vec2 scale = glm::vec2(1.0f))
-            : positionVec(position), rotationVal(rotation), scaleVec(scale) {
+            : positionVec(position), rotationVal(rotation), scaleVec(scale) ,velocityVec(vel) {
         updateMatrix();
     }
 
@@ -86,7 +86,7 @@ private:
         positionVec = glm::vec2(matrixVal[3]);
         glm::quat q = glm::quat_cast(matrixVal);
         glm::vec3 eulerAngles = glm::eulerAngles(q);
-        rotationVal = eulerAngles.z;
+        rotationVal = eulerAngles.z + ((abs(eulerAngles.x) == M_PI / 2 && abs(eulerAngles.y) == M_PI / 2) ? (M_PI / 2) : 0);
         scaleVec.x = glm::length(glm::vec2(matrixVal[0]));
         scaleVec.y = glm::length(glm::vec2(matrixVal[1]));
     }
