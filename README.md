@@ -2,4 +2,4 @@
 
 # Reasonable2D
 
-Originally a project created at course called "Two-Dimensional Video Games" at Lodz University of Technology. It is now my passion project.
+Originally a project created at course called "Dwuwymiarowe gry komputerowe" (Two-Dimensional Video Games) at Lodz University of Technology. It is now my passion project.
